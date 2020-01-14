@@ -147,7 +147,7 @@ public class AlbumPickerPlugin implements FlutterPlugin, MethodCallHandler, Acti
     }
 
     if (call.method.equals("pickFile")) {
-      delegate.pickFile();
+      delegate.pickFile(call,rawResult);
     } else {
       rawResult.notImplemented();
     }
