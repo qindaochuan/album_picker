@@ -22,7 +22,14 @@ import androidx.fragment.app.FragmentTransaction;
 import com.qianren.adapter.ViewPagerAdapter;
 import com.qianren.entity.AlbumInfo;
 import com.qianren.entity.PhotoInfo;
+import com.qianren.fragments.AlbumFragment;
+import com.qianren.fragments.AlbumFragment.OnAlbumClickListener;
+import com.qianren.fragments.PhotoFragment;
+import com.qianren.fragments.PhotoFragment.OnGridClickListener;
+import com.qianren.fragments.ViewPagerFragment;
 import com.qianren.album_picker.R;
+import com.qianren.stickview.DeleteActivity;
+import com.qianren.stickview.StickerViewActivity;
 import com.qianren.util.CheckImageLoaderConfiguration;
 import com.qianren.util.UniversalImageLoader;
 
@@ -36,9 +43,12 @@ import java.util.List;
  * @author ghc
  */
 public class MainActivity extends AppCompatActivity
-        implements ViewPagerAdapter.OnStickerClickListener {
+        implements OnAlbumClickListener, OnGridClickListener, ViewPagerAdapter.OnStickerClickListener {
 
     private static final String TAG = "MainActivity";
+    private AlbumFragment mAlbumFragment;
+    private PhotoFragment mPhotoFragment;
+    private ViewPagerFragment mPagerFragment;
     //    private EditPhotoFragment mEditPhotoFragment;
     private FragmentManager mFragmentManager;
     private int mEditTag = 0;
@@ -127,6 +137,14 @@ public class MainActivity extends AppCompatActivity
         if (mFragmentManager != null) {
             FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
+            mAlbumFragment = (AlbumFragment) mFragmentManager.findFragmentByTag(Constants.TAG_FRAGMENT_ALBUM);
+            if (mAlbumFragment == null) {
+                mAlbumFragment = new AlbumFragment();
+                transaction.add(R.id.selectphoto_content, mAlbumFragment, Constants.TAG_FRAGMENT_ALBUM);
+            } else {
+                mAlbumFragment.invalidate();
+                transaction.show(mAlbumFragment);
+            }
             transaction.commitAllowingStateLoss();
         }
     }
@@ -134,6 +152,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        if (mPhotoFragment != null) {
+            mPhotoFragment.invalidate();
+        }
     }
 
     @Override
@@ -145,10 +166,57 @@ public class MainActivity extends AppCompatActivity
     /**
      * GridView的Item点击的事件响应--图片列表的点击事件
      */
+    @Override
+    public void onGridItemClick(AlbumInfo albumInfo, final int position) {
+        if (mFragmentManager != null) {
+            FragmentTransaction transaction = mFragmentManager.beginTransaction();
+            transaction.hide(mPhotoFragment);
+
+            if (mEditTag == 0) {
+                mPagerFragment = (ViewPagerFragment) mFragmentManager.findFragmentByTag(Constants.TAG_FRAGMENT_PAGER);
+                if (mPagerFragment == null) {
+                    mPagerFragment = new ViewPagerFragment();
+                    mPagerFragment.setInfo(albumInfo, position);
+
+                    transaction.add(R.id.selectphoto_content, mPagerFragment, Constants.TAG_FRAGMENT_PAGER);
+                    transaction.addToBackStack(null);
+                } else {
+                    mPagerFragment.setInfo(albumInfo, position);
+                    transaction.show(mPagerFragment);
+                }
+            }
+            transaction.commitAllowingStateLoss();
+        }
+    }
 
     /**
      * ListView的Item点击的事件响应--相册列表的点击事件
      */
+    @Override
+    public void onListClick(AlbumInfo albumInfo) {
+        if (albumInfo != null) {
+            if (mFragmentManager != null && resetDataStatus(albumInfo)) {
+                FragmentTransaction transaction = mFragmentManager.beginTransaction();
+                transaction.hide(mAlbumFragment);
+
+                mPhotoFragment = (PhotoFragment) mFragmentManager.findFragmentByTag(Constants.TAG_FRAGMENT_PHOTO);
+                if (mPhotoFragment == null) {
+                    mPhotoFragment = new PhotoFragment();
+                    mPhotoFragment.setInfo(albumInfo);
+                    mPhotoFragment.setEditTag(mEditTag);
+
+                    transaction.add(R.id.selectphoto_content, mPhotoFragment, Constants.TAG_FRAGMENT_PHOTO);
+                } else {
+                    //添加贴纸后，通知更新
+                    mPhotoFragment.invalidate();
+                    mPhotoFragment.setInfo(albumInfo);
+                    transaction.show(mPhotoFragment);
+                }
+
+                transaction.commitAllowingStateLoss();
+            }
+        }
+    }
 
     public boolean removeFragment(Fragment fragment) {
         if (null == fragment) return false;
@@ -156,6 +224,9 @@ public class MainActivity extends AppCompatActivity
         ft.remove(fragment);
         ft.commitAllowingStateLoss();
         getSupportFragmentManager().popBackStack();
+        if (fragment instanceof ViewPagerFragment) {
+            mPhotoFragment.invalidate();
+        }
         return true;
     }
 
@@ -183,12 +254,16 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onStickerClickListener(String path) {
-
+        Intent intent = new Intent(this, StickerViewActivity.class);
+        intent.putExtra(EDIT_PIC_PATH, path);
+        startActivity(intent);
     }
 
     @Override
     public void onDeleteTouchListener(String path) {
-
+        Intent intent = new Intent(this, DeleteActivity.class);
+        intent.putExtra(EDIT_PIC_PATH, path);
+        startActivity(intent);
     }
 
     private boolean checkPermission() {
