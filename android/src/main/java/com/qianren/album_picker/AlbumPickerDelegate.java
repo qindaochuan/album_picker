@@ -11,6 +11,8 @@ import java.lang.ref.WeakReference;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
+
+import com.qianren.MainActivity;
 import com.qianren.album_picker.R;
 
 public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListener,PluginRegistry.RequestPermissionsResultListener {
@@ -60,15 +62,19 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
     }
 
     public void doAlbumPick(){
+        System.out.println("doAlbumPick()");
         new Thread()
         {
             @Override
             public void run() {
                 super.run();
                 Looper.prepare();
+                System.out.println("AlbumPicker startActivity: MainActivity");
+                Intent intent = new Intent(activity, MainActivity.class);
+                activity.startActivity(intent);
                 Looper.loop();
             }
-        };
+        }.start();
     }
 
     @Override
