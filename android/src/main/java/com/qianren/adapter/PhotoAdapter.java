@@ -247,7 +247,11 @@ public class PhotoAdapter extends BaseAdapter {
         ImageView iv_check;
 
         ViewHolder(View view) {
-            ButterKnife.bind(this, view);
+            //ButterKnife.bind(this, view);
+
+            iv_photo = (ImageView)view.findViewById(R.id.item_grid_image);
+
+            iv_check = (ImageView)view.findViewById(R.id.item_grid_select);
         }
     }
 

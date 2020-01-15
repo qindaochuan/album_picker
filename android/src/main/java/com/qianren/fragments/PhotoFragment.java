@@ -84,7 +84,14 @@ public class PhotoFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mFragment = inflater.inflate(R.layout.fragment_gridview, container, false);
-        ButterKnife.bind(this, mFragment);
+        //ButterKnife.bind(this, mFragment);
+
+        mGridView = (GridView)mFragment.findViewById(R.id.photo_gridview);
+
+        mSendBtn = (Button)mFragment.findViewById(R.id.send_image_btn1);
+
+        mBottomLayout = (RelativeLayout)mFragment.findViewById(R.id.relativeLayout);
+
         initView();
         return mFragment;
     }

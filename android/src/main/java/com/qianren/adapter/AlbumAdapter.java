@@ -96,7 +96,13 @@ public class AlbumAdapter extends BaseAdapter {
 
         ViewHolder(View view) {
 //            this.iv_album = view.bin;
-            ButterKnife.bind(this, view);
+            //ButterKnife.bind(this, view);
+
+            iv_album = (ImageView)view.findViewById(R.id.album_iv);
+
+            tv_name = (TextView)view.findViewById(R.id.album_name_tv);
+
+            tv_count = (TextView)view.findViewById(R.id.album_count_tv);
         }
     }
 }

@@ -103,7 +103,11 @@ public class AlbumFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mFragment = inflater.inflate(R.layout.fragment_listview, container, false);
         initView();
-        ButterKnife.bind(this, mFragment);
+        //ButterKnife.bind(this, mFragment);
+
+         mListView = (ListView)mFragment.findViewById(R.id.album_lv);
+
+         mProgressBar = (ProgressBar)mFragment.findViewById(R.id.loading_photos_progressBar);
         return mFragment;
     }
 
