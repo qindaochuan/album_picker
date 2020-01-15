@@ -41,13 +41,13 @@ import butterknife.ButterKnife;
  */
 public class PhotoFragment extends BaseFragment {
 
-    @BindView(R.id.photo_gridview)
+    //@BindView(R.id.photo_gridview)
     GridView mGridView;
 
-    @BindView(R.id.send_image_btn1)
+    //@BindView(R.id.send_image_btn1)
     Button mSendBtn;
 
-    @BindView(R.id.relativeLayout)
+    //@BindView(R.id.relativeLayout)
     RelativeLayout mBottomLayout;
 
     private AlbumInfo mAlbumInfo;

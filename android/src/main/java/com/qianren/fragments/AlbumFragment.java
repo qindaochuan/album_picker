@@ -50,10 +50,10 @@ import butterknife.ButterKnife;
  */
 public class AlbumFragment extends BaseFragment {
 
-    @BindView(R.id.album_lv)
+    //@BindView(R.id.album_lv)
     ListView mListView;
 
-    @BindView(R.id.loading_photos_progressBar)
+    //@BindView(R.id.loading_photos_progressBar)
     ProgressBar mProgressBar;
 
     private List<AlbumInfo> mAlbumList = new ArrayList<AlbumInfo>();

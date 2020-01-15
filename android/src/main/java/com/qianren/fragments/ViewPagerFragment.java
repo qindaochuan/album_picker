@@ -32,7 +32,7 @@ import butterknife.ButterKnife;
  */
 public class ViewPagerFragment extends BaseFragment implements ViewPager.OnPageChangeListener {
 
-    @BindView(R.id.view_pager)
+    //@BindView(R.id.view_pager)
     ViewPagerFixed mViewPager;
 
 /*    @BindView(R.id.send_image_btn1)
