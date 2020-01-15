@@ -240,10 +240,10 @@ public class PhotoAdapter extends BaseAdapter {
     }
 
     class ViewHolder {
-        @BindView(R.id.item_grid_image)
+        //@BindView(R.id.item_grid_image)
         ImageView iv_photo;
 
-        @BindView(R.id.item_grid_select)
+        //@BindView(R.id.item_grid_select)
         ImageView iv_check;
 
         ViewHolder(View view) {
