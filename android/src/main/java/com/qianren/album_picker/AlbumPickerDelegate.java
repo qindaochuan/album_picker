@@ -11,6 +11,7 @@ import java.lang.ref.WeakReference;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
+import com.qianren.album_picker.R;
 
 public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListener,PluginRegistry.RequestPermissionsResultListener {
     private final Activity activity;
@@ -22,6 +23,8 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
     public AlbumPickerDelegate(Activity activity){
         this.activity = activity;
         this.handler = new MyHandler(activity,this);
+
+        System.out.println("R.id.album_count_tv = " + R.id.album_count_tv);
     }
 
     public void pickFile(MethodCall call, MethodChannel.Result result){

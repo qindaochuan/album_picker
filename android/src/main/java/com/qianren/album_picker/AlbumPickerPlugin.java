@@ -171,7 +171,7 @@ public class AlbumPickerPlugin implements FlutterPlugin, MethodCallHandler, Acti
 
   @Override
   public void onDetachedFromActivityForConfigChanges() {
-    tearDown();
+    onDetachedFromActivity();
   }
 
   @Override
@@ -181,7 +181,7 @@ public class AlbumPickerPlugin implements FlutterPlugin, MethodCallHandler, Acti
 
   @Override
   public void onDetachedFromActivity() {
-    onDetachedFromActivity();
+    tearDown();
   }
 
   private void setup(
