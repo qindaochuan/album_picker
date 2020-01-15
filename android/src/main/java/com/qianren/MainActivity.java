@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -20,6 +22,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.qianren.adapter.ViewPagerAdapter;
+import com.qianren.album_picker.AlbumPickerDelegate;
 import com.qianren.entity.AlbumInfo;
 import com.qianren.entity.PhotoInfo;
 import com.qianren.fragments.AlbumFragment;
@@ -167,26 +170,40 @@ public class MainActivity extends AppCompatActivity
      * GridView的Item点击的事件响应--图片列表的点击事件
      */
     @Override
-    public void onGridItemClick(AlbumInfo albumInfo, final int position) {
-        if (mFragmentManager != null) {
-            FragmentTransaction transaction = mFragmentManager.beginTransaction();
-            transaction.hide(mPhotoFragment);
-
-            if (mEditTag == 0) {
-                mPagerFragment = (ViewPagerFragment) mFragmentManager.findFragmentByTag(Constants.TAG_FRAGMENT_PAGER);
-                if (mPagerFragment == null) {
-                    mPagerFragment = new ViewPagerFragment();
-                    mPagerFragment.setInfo(albumInfo, position);
-
-                    transaction.add(R.id.selectphoto_content, mPagerFragment, Constants.TAG_FRAGMENT_PAGER);
-                    transaction.addToBackStack(null);
-                } else {
-                    mPagerFragment.setInfo(albumInfo, position);
-                    transaction.show(mPagerFragment);
-                }
+    public void onGridItemClick(final AlbumInfo albumInfo, final int position) {
+//        if (mFragmentManager != null) {
+//            FragmentTransaction transaction = mFragmentManager.beginTransaction();
+//            transaction.hide(mPhotoFragment);
+//
+//            if (mEditTag == 0) {
+//                mPagerFragment = (ViewPagerFragment) mFragmentManager.findFragmentByTag(Constants.TAG_FRAGMENT_PAGER);
+//                if (mPagerFragment == null) {
+//                    mPagerFragment = new ViewPagerFragment();
+//                    mPagerFragment.setInfo(albumInfo, position);
+//
+//                    transaction.add(R.id.selectphoto_content, mPagerFragment, Constants.TAG_FRAGMENT_PAGER);
+//                    transaction.addToBackStack(null);
+//                } else {
+//                    mPagerFragment.setInfo(albumInfo, position);
+//                    transaction.show(mPagerFragment);
+//                }
+//            }
+//            transaction.commitAllowingStateLoss();
+//        }
+        Handler thisHandler = new Handler(Looper.getMainLooper());
+        thisHandler.post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                System.out.println("文件路径: " + albumInfo.getPhotoList().get(position).getImagePath());
+                System.out.println("缩略图路径: " + albumInfo.getPhotoList().get(position).getThumbnailPath());
+                final String ret = albumInfo.getPhotoList().get(position).getImagePath() + ";" + albumInfo.getPhotoList().get(position).getThumbnailPath();
+                System.out.println(ret);
+                AlbumPickerDelegate.result.success(ret);
+                finish();
             }
-            transaction.commitAllowingStateLoss();
-        }
+        });
     }
 
     /**

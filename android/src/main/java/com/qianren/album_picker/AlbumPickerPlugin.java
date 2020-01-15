@@ -214,12 +214,12 @@ public class AlbumPickerPlugin implements FlutterPlugin, MethodCallHandler, Acti
     activityBinding.removeActivityResultListener(delegate);
     activityBinding.removeRequestPermissionsResultListener(delegate);
     activityBinding = null;
-    lifecycle.removeObserver(observer);
+    //lifecycle.removeObserver(observer);
     lifecycle = null;
     delegate = null;
     channel.setMethodCallHandler(null);
     channel = null;
-    application.unregisterActivityLifecycleCallbacks(observer);
+    //application.unregisterActivityLifecycleCallbacks(observer);
     application = null;
   }
 

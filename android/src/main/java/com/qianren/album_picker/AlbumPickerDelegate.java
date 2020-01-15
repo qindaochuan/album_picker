@@ -31,6 +31,7 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
 
     public void pickFile(MethodCall call, MethodChannel.Result result){
         System.out.println("Android call pickFile()");
+        this.result = result;
         Message msg = new Message();
         msg.what = HANDLER_ALBUM_PICK;
         handler.sendMessage(msg);
