@@ -85,13 +85,13 @@ public class AlbumAdapter extends BaseAdapter {
     }
 
     class ViewHolder {
-        @BindView(R.id.album_iv)
+        //@BindView(R.id.album_iv)
         ImageView iv_album;
 
-        @BindView(R.id.album_name_tv)
+        //@BindView(R.id.album_name_tv)
         TextView tv_name;
 
-        @BindView(R.id.album_count_tv)
+        //@BindView(R.id.album_count_tv)
         TextView tv_count;
 
         ViewHolder(View view) {
