@@ -44,12 +44,20 @@
 @property (nonatomic, strong) UIImagePickerController *imagePickerVc;
 @property (strong, nonatomic) CLLocation *location;
 @property (nonatomic, strong) NSOperationQueue *operationQueue;
+@property (nonatomic,copy) FlutterResult result;
 @end
 
 static CGSize AssetGridThumbnailSize;
 static CGFloat itemMargin = 5;
 
 @implementation TZPhotoPickerController
+
+- (instancetype) initWithResult:(FlutterResult)result{
+    if (self = [self init]) {
+        self.result = result;
+    }
+    return self;
+}
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -81,15 +89,15 @@ static CGFloat itemMargin = 5;
     _isSelectOriginalPhoto = tzImagePickerVc.isSelectOriginalPhoto;
     _shouldScrollToBottom = YES;
     self.view.backgroundColor = [UIColor whiteColor];
-    self.navigationItem.title = _model.name;
+    self.navigationItem.title = @"相册"/*_model.name*/;
     UIBarButtonItem *cancelItem = [[UIBarButtonItem alloc] initWithTitle:tzImagePickerVc.cancelBtnTitleStr style:UIBarButtonItemStylePlain target:tzImagePickerVc action:@selector(cancelButtonClick)];
     [TZCommonTools configBarButtonItem:cancelItem tzImagePickerVc:tzImagePickerVc];
     self.navigationItem.rightBarButtonItem = cancelItem;
-    if (tzImagePickerVc.navLeftBarButtonSettingBlock) {
+    if (true/*tzImagePickerVc.navLeftBarButtonSettingBlock*/) {
         UIButton *leftButton = [UIButton buttonWithType:UIButtonTypeCustom];
         leftButton.frame = CGRectMake(0, 0, 44, 44);
         [leftButton addTarget:self action:@selector(navLeftBarButtonClick) forControlEvents:UIControlEventTouchUpInside];
-        tzImagePickerVc.navLeftBarButtonSettingBlock(leftButton);
+        //tzImagePickerVc.navLeftBarButtonSettingBlock(leftButton);
         self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:leftButton];
     } else if (tzImagePickerVc.childViewControllers.count) {
         UIBarButtonItem *backItem = [[UIBarButtonItem alloc] initWithTitle:[NSBundle tz_localizedStringForKey:@"Back"] style:UIBarButtonItemStylePlain target:nil action:nil];
@@ -606,30 +614,34 @@ static CGFloat itemMargin = 5;
     NSArray *resources = [PHAssetResource assetResourcesForAsset:model.asset];
     NSString *orgFilename = ((PHAssetResource*)resources[0]).originalFilename;
     NSLog(orgFilename);
-    if (model.type == TZAssetModelMediaTypeVideo && !tzImagePickerVc.allowPickingMultipleVideo) {
-        if (tzImagePickerVc.selectedModels.count > 0) {
-            TZImagePickerController *imagePickerVc = (TZImagePickerController *)self.navigationController;
-            [imagePickerVc showAlertWithTitle:[NSBundle tz_localizedStringForKey:@"Can not choose both video and photo"]];
-        } else {
-            TZVideoPlayerController *videoPlayerVc = [[TZVideoPlayerController alloc] init];
-            videoPlayerVc.model = model;
-            [self.navigationController pushViewController:videoPlayerVc animated:YES];
-        }
-    } else if (model.type == TZAssetModelMediaTypePhotoGif && tzImagePickerVc.allowPickingGif && !tzImagePickerVc.allowPickingMultipleVideo) {
-        if (tzImagePickerVc.selectedModels.count > 0) {
-            TZImagePickerController *imagePickerVc = (TZImagePickerController *)self.navigationController;
-            [imagePickerVc showAlertWithTitle:[NSBundle tz_localizedStringForKey:@"Can not choose both photo and GIF"]];
-        } else {
-            TZGifPhotoPreviewController *gifPreviewVc = [[TZGifPhotoPreviewController alloc] init];
-            gifPreviewVc.model = model;
-            [self.navigationController pushViewController:gifPreviewVc animated:YES];
-        }
-    } else {
-        TZPhotoPreviewController *photoPreviewVc = [[TZPhotoPreviewController alloc] init];
-        photoPreviewVc.currentIndex = index;
-        photoPreviewVc.models = _models;
-        [self pushPhotoPrevireViewController:photoPreviewVc];
-    }
+    self.result(orgFilename);
+    [self dismissViewControllerAnimated:(YES) completion:^{
+        
+    }];
+//    if (model.type == TZAssetModelMediaTypeVideo && !tzImagePickerVc.allowPickingMultipleVideo) {
+//        if (tzImagePickerVc.selectedModels.count > 0) {
+//            TZImagePickerController *imagePickerVc = (TZImagePickerController *)self.navigationController;
+//            [imagePickerVc showAlertWithTitle:[NSBundle tz_localizedStringForKey:@"Can not choose both video and photo"]];
+//        } else {
+//            TZVideoPlayerController *videoPlayerVc = [[TZVideoPlayerController alloc] init];
+//            videoPlayerVc.model = model;
+//            [self.navigationController pushViewController:videoPlayerVc animated:YES];
+//        }
+//    } else if (model.type == TZAssetModelMediaTypePhotoGif && tzImagePickerVc.allowPickingGif && !tzImagePickerVc.allowPickingMultipleVideo) {
+//        if (tzImagePickerVc.selectedModels.count > 0) {
+//            TZImagePickerController *imagePickerVc = (TZImagePickerController *)self.navigationController;
+//            [imagePickerVc showAlertWithTitle:[NSBundle tz_localizedStringForKey:@"Can not choose both photo and GIF"]];
+//        } else {
+//            TZGifPhotoPreviewController *gifPreviewVc = [[TZGifPhotoPreviewController alloc] init];
+//            gifPreviewVc.model = model;
+//            [self.navigationController pushViewController:gifPreviewVc animated:YES];
+//        }
+//    } else {
+//        TZPhotoPreviewController *photoPreviewVc = [[TZPhotoPreviewController alloc] init];
+//        photoPreviewVc.currentIndex = index;
+//        photoPreviewVc.models = _models;
+//        [self pushPhotoPrevireViewController:photoPreviewVc];
+//    }
 }
 
 #pragma mark - UIScrollViewDelegate

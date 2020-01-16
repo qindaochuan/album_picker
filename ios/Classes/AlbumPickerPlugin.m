@@ -48,7 +48,7 @@
 }
 
 - (void)pickFile{
-   TZImagePickerController *imagePickerVc = [[TZImagePickerController alloc] initWithMaxImagesCount:1 columnNumber:3 delegate:self pushPhotoPickerVc:YES];
+    TZImagePickerController *imagePickerVc = [[TZImagePickerController alloc] initWithMaxImagesCount:1 columnNumber:3 delegate:self pushPhotoPickerVc:YES result:self.result];
        // imagePickerVc.barItemTextColor = [UIColor blackColor];
        // [imagePickerVc.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor blackColor]}];
        // imagePickerVc.navigationBar.tintColor = [UIColor blackColor];

@@ -33,6 +33,7 @@
 /// Default is 4, Use in photos collectionView in TZPhotoPickerController
 /// 默认4列, TZPhotoPickerController中的照片collectionView
 @property (nonatomic, assign) NSInteger columnNumber;
+@property (nonatomic,copy) FlutterResult result;
 @end
 
 @implementation TZImagePickerController
@@ -142,18 +143,19 @@
 }
 
 - (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount delegate:(id<TZImagePickerControllerDelegate>)delegate {
-    return [self initWithMaxImagesCount:maxImagesCount columnNumber:4 delegate:delegate pushPhotoPickerVc:YES];
+    return [self initWithMaxImagesCount:maxImagesCount columnNumber:4 delegate:delegate pushPhotoPickerVc:YES result:self.result];
 }
 
 - (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate {
-    return [self initWithMaxImagesCount:maxImagesCount columnNumber:columnNumber delegate:delegate pushPhotoPickerVc:YES];
+    return [self initWithMaxImagesCount:maxImagesCount columnNumber:columnNumber delegate:delegate pushPhotoPickerVc:YES result:self.result];
 }
 
-- (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate pushPhotoPickerVc:(BOOL)pushPhotoPickerVc {
+- (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate pushPhotoPickerVc:(BOOL)pushPhotoPickerVc result:(FlutterResult)result {
     _pushPhotoPickerVc = pushPhotoPickerVc;
     TZAlbumPickerController *albumPickerVc = [[TZAlbumPickerController alloc] init];
     albumPickerVc.isFirstAppear = YES;
     albumPickerVc.columnNumber = columnNumber;
+    self.result = result;
     self = [super initWithRootViewController:albumPickerVc];
     if (self) {
         self.maxImagesCount = maxImagesCount > 0 ? maxImagesCount : 9; // Default is 9 / 默认最大可选9张图片
@@ -390,7 +392,7 @@
     _didPushPhotoPickerVc = NO;
     // 1.6.8 判断是否需要push到照片选择页，如果_pushPhotoPickerVc为NO,则不push
     if (!_didPushPhotoPickerVc && _pushPhotoPickerVc) {
-        TZPhotoPickerController *photoPickerVc = [[TZPhotoPickerController alloc] init];
+        TZPhotoPickerController *photoPickerVc = [[TZPhotoPickerController alloc] initWithResult:self.result];
         photoPickerVc.isFirstAppear = YES;
         photoPickerVc.columnNumber = self.columnNumber;
         [[TZImageManager manager] getCameraRollAlbum:self.allowPickingVideo allowPickingImage:self.allowPickingImage needFetchAssets:NO completion:^(TZAlbumModel *model) {
@@ -679,6 +681,7 @@
 #pragma mark - Public
 
 - (void)cancelButtonClick {
+    self.result(@"");
     if (self.autoDismiss) {
         [self dismissViewControllerAnimated:YES completion:^{
             [self callDelegateMethod];

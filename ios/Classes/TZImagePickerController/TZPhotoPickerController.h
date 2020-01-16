@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <Flutter/Flutter.h>
 
 @class TZAlbumModel;
 @interface TZPhotoPickerController : UIViewController
@@ -14,6 +15,8 @@
 @property (nonatomic, assign) BOOL isFirstAppear;
 @property (nonatomic, assign) NSInteger columnNumber;
 @property (nonatomic, strong) TZAlbumModel *model;
+
+- (instancetype) initWithResult:(FlutterResult)result;
 @end
 
 
