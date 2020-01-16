@@ -612,9 +612,50 @@ static CGFloat itemMargin = 5;
     }
     TZAssetModel *model = _models[index];
     NSArray *resources = [PHAssetResource assetResourcesForAsset:model.asset];
-    NSString *orgFilename = ((PHAssetResource*)resources[0]).originalFilename;
-    NSLog(orgFilename);
-    self.result(orgFilename);
+    PHAssetResource *resource = [resources firstObject];
+    NSString *fileName = resource.originalFilename;
+    if (model.asset.mediaType == PHAssetMediaTypeImage) {
+        PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
+        options.version = PHImageRequestOptionsVersionCurrent;
+        options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+        options.synchronous = YES;
+        
+        NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:fileName];
+        [[NSFileManager defaultManager] removeItemAtPath:tempFilePath error:nil];
+        [[PHAssetResourceManager defaultManager] writeDataForAssetResource:resource
+                                                                    toFile:[NSURL fileURLWithPath:tempFilePath]
+                                                                   options:nil
+                                                         completionHandler:^(NSError * _Nullable error) {
+            if (error) {
+                self.result(@"");
+            } else {
+                [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:tempFilePath]];
+                self.result(tempFilePath);
+            }
+        }];
+    }
+    else if(model.asset.mediaType == PHAssetMediaTypeVideo || model.asset.mediaSubtypes == PHAssetMediaSubtypePhotoLive){
+        PHVideoRequestOptions *options = [[PHVideoRequestOptions alloc] init];
+        options.version = PHImageRequestOptionsVersionCurrent;
+        options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+        
+        NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:fileName];
+        [[NSFileManager defaultManager] removeItemAtPath:tempFilePath error:nil];
+        [[PHAssetResourceManager defaultManager] writeDataForAssetResource:resource
+                                                                    toFile:[NSURL fileURLWithPath:tempFilePath]
+                                                                   options:nil
+                                                         completionHandler:^(NSError * _Nullable error) {
+            if (error) {
+                self.result(@"");
+            } else {
+                [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:tempFilePath]];
+                self.result(tempFilePath);
+            }
+        }];
+    }
+//    NSString *orgFilename = ((PHAssetResource*)resources[0]).originalFilename;
+//    NSLog(orgFilename);
+//    self.result(orgFilename);
     [self dismissViewControllerAnimated:(YES) completion:^{
         
     }];
