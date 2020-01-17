@@ -44,7 +44,7 @@
         android:layout_marginRight="8dp"
         android:layout_marginTop="16dp"/>
 
-    <com.qianren.stickview.stickerview.StickerView
+    <com.qianren2.stickview.stickerview.StickerView
         android:id="@+id/stickerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

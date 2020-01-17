@@ -1,11 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.qianren.album_picker">
+    package="com.qianren2.album_picker">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:theme="@style/AppTheme" >
-        <activity android:name="com.qianren.MainActivity" />
+        <activity android:name="com.qianren2.MainActivity" />
     </application>
 </manifest>
