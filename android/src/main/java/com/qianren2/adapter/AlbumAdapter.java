@@ -42,7 +42,11 @@ public class AlbumAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
-        return (mList == null ? null : mList.get(position));
+        if(mList == null || mList.size() == 0){
+            return null;
+        }else{
+            return mList.get(position);
+        }
     }
 
     @Override
