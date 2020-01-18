@@ -6,6 +6,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+import com.zhihu.matisse.Matisse;
+import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.engine.impl.PicassoEngine;
+import com.zhihu.matisse.filter.Filter;
+
 import java.lang.ref.WeakReference;
 
 import io.flutter.plugin.common.MethodCall;
@@ -66,6 +71,16 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
                 super.run();
                 Looper.prepare();
                 System.out.println("AlbumPicker startActivity: MainActivity");
+                Matisse.from(activity)
+                        .choose(MimeType.ofImage())
+                        .theme(R.style.Matisse_Dracula)
+                        .countable(false)
+                        .addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
+                        .maxSelectable(9)
+                        .originalEnable(true)
+                        .maxOriginalSize(10)
+                        .imageEngine(new PicassoEngine())
+                        .forResult();
                 Looper.loop();
             }
         }.start();
