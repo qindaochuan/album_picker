@@ -55,6 +55,7 @@ public class MediaGrid extends SquareFrameLayout implements View.OnClickListener
 
         mThumbnail = (ImageView) findViewById(R.id.media_thumbnail);
         mCheckView = (CheckView) findViewById(R.id.check_view);
+        mCheckView.setVisibility(View.INVISIBLE);
         mGifTag = (ImageView) findViewById(R.id.gif);
         mVideoDuration = (TextView) findViewById(R.id.video_duration);
 

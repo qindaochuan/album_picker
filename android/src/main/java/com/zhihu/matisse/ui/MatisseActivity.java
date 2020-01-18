@@ -39,6 +39,7 @@ import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.qianren2.album_picker.AlbumPickerDelegate;
 import com.qianren2.album_picker.R;
 import com.zhihu.matisse.internal.entity.Album;
 import com.zhihu.matisse.internal.entity.Item;
@@ -129,7 +130,9 @@ public class MatisseActivity extends AppCompatActivity implements
         navigationIcon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
 
         mButtonPreview = (TextView) findViewById(R.id.button_preview);
+        mButtonPreview.setVisibility(View.INVISIBLE);
         mButtonApply = (TextView) findViewById(R.id.button_apply);
+        mButtonApply.setVisibility(View.INVISIBLE);
         mButtonPreview.setOnClickListener(this);
         mButtonApply.setOnClickListener(this);
         mContainer = findViewById(R.id.container);
@@ -137,6 +140,7 @@ public class MatisseActivity extends AppCompatActivity implements
         mOriginalLayout = findViewById(R.id.originalLayout);
         mOriginal = findViewById(R.id.original);
         mOriginalLayout.setOnClickListener(this);
+        mOriginal.setVisibility(View.INVISIBLE);
 
         mSelectedCollection.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
@@ -414,12 +418,24 @@ public class MatisseActivity extends AppCompatActivity implements
 
     @Override
     public void onMediaClick(Album album, Item item, int adapterPosition) {
-        Intent intent = new Intent(this, AlbumPreviewActivity.class);
-        intent.putExtra(AlbumPreviewActivity.EXTRA_ALBUM, album);
-        intent.putExtra(AlbumPreviewActivity.EXTRA_ITEM, item);
-        intent.putExtra(BasePreviewActivity.EXTRA_DEFAULT_BUNDLE, mSelectedCollection.getDataWithBundle());
-        intent.putExtra(BasePreviewActivity.EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
-        startActivityForResult(intent, REQUEST_CODE_PREVIEW);
+        final String path = PathUtils.getPath(this, item.getContentUri());
+        System.out.println(path);
+        Handler thisHandler = new Handler(Looper.getMainLooper());
+        thisHandler.post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                AlbumPickerDelegate.result.success(path);
+                finish();
+            }
+        });
+//        Intent intent = new Intent(this, AlbumPreviewActivity.class);
+//        intent.putExtra(AlbumPreviewActivity.EXTRA_ALBUM, album);
+//        intent.putExtra(AlbumPreviewActivity.EXTRA_ITEM, item);
+//        intent.putExtra(BasePreviewActivity.EXTRA_DEFAULT_BUNDLE, mSelectedCollection.getDataWithBundle());
+//        intent.putExtra(BasePreviewActivity.EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
+//        startActivityForResult(intent, REQUEST_CODE_PREVIEW);
     }
 
     @Override
