@@ -8,6 +8,7 @@ import android.os.Message;
 
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.engine.impl.GlideEngine;
 import com.zhihu.matisse.engine.impl.PicassoEngine;
 import com.zhihu.matisse.filter.Filter;
 
@@ -79,7 +80,7 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
                         .maxSelectable(9)
                         .originalEnable(true)
                         .maxOriginalSize(10)
-                        .imageEngine(new PicassoEngine())
+                        .imageEngine(new GlideEngine())
                         .forResult();
                 Looper.loop();
             }
