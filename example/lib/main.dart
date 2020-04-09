@@ -36,9 +36,13 @@ class _MyAppState extends State<MyApp> {
         floatingActionButton: RaisedButton(
           child: Icon(Icons.album),
           onPressed: () async{
-            String path = await AlbumPicker.pickFile();
+            List<String> paths = await AlbumPicker.pickFile();
+            String str = "";
+            paths.forEach((f){
+              str += f + ";";
+            });
             setState(() {
-              _filePath = path;
+              _filePath = str;
             });
           }
         ),

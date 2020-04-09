@@ -22,6 +22,7 @@ import com.luck.picture.lib.style.PictureParameterStyle;
 import com.luck.picture.lib.style.PictureWindowAnimationStyle;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
 
 import io.flutter.plugin.common.MethodCall;
@@ -166,6 +167,7 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
                         .forResult(new OnResultCallbackListener<LocalMedia>() {
                             @Override
                             public void onResult(List<LocalMedia> result) {
+                                List<String> paths = new ArrayList<String>();
                                 for (LocalMedia media : result) {
                                     Log.i(TAG, "是否压缩:" + media.isCompressed());
                                     Log.i(TAG, "压缩:" + media.getCompressPath());
@@ -176,9 +178,9 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
                                     Log.i(TAG, "原图路径:" + media.getOriginalPath());
                                     Log.i(TAG, "Android Q 特有Path:" + media.getAndroidQToPath());
                                     Log.i(TAG, "Size: " + media.getSize());
+                                    paths.add(media.getPath());
                                 }
-                                //mAdapter.setList(result);
-                                //mAdapter.notifyDataSetChanged();
+                                AlbumPickerDelegate.result.success(paths);
                             }
 
                             @Override
