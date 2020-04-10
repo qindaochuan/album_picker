@@ -89,15 +89,15 @@ static CGFloat itemMargin = 5;
     _isSelectOriginalPhoto = tzImagePickerVc.isSelectOriginalPhoto;
     _shouldScrollToBottom = YES;
     self.view.backgroundColor = [UIColor whiteColor];
-    self.navigationItem.title = @"相册"/*_model.name*/;
+    self.navigationItem.title = _model.name;
     UIBarButtonItem *cancelItem = [[UIBarButtonItem alloc] initWithTitle:tzImagePickerVc.cancelBtnTitleStr style:UIBarButtonItemStylePlain target:tzImagePickerVc action:@selector(cancelButtonClick)];
     [TZCommonTools configBarButtonItem:cancelItem tzImagePickerVc:tzImagePickerVc];
     self.navigationItem.rightBarButtonItem = cancelItem;
-    if (true/*tzImagePickerVc.navLeftBarButtonSettingBlock*/) {
+    if (tzImagePickerVc.navLeftBarButtonSettingBlock) {
         UIButton *leftButton = [UIButton buttonWithType:UIButtonTypeCustom];
         leftButton.frame = CGRectMake(0, 0, 44, 44);
         [leftButton addTarget:self action:@selector(navLeftBarButtonClick) forControlEvents:UIControlEventTouchUpInside];
-        //tzImagePickerVc.navLeftBarButtonSettingBlock(leftButton);
+        tzImagePickerVc.navLeftBarButtonSettingBlock(leftButton);
         self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:leftButton];
     } else if (tzImagePickerVc.childViewControllers.count) {
         UIBarButtonItem *backItem = [[UIBarButtonItem alloc] initWithTitle:[NSBundle tz_localizedStringForKey:@"Back"] style:UIBarButtonItemStylePlain target:nil action:nil];
@@ -482,19 +482,25 @@ static CGFloat itemMargin = 5;
             return;
         }
     }
-    
-    if ([tzImagePickerVc.pickerDelegate respondsToSelector:@selector(imagePickerController:didFinishPickingPhotos:sourceAssets:isSelectOriginalPhoto:)]) {
-        [tzImagePickerVc.pickerDelegate imagePickerController:tzImagePickerVc didFinishPickingPhotos:photos sourceAssets:assets isSelectOriginalPhoto:_isSelectOriginalPhoto];
+    NSMutableArray* paths = [[NSMutableArray alloc] init];
+    for (PHAsset *phAsset in assets) {
+        NSArray *resources = [PHAssetResource assetResourcesForAsset:phAsset];
+        PHAssetResource *resource = [resources firstObject];
+        NSString *fileName = resource.originalFilename;
+        
+        NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:fileName];;
+        [[NSFileManager defaultManager] removeItemAtPath:tempFilePath error:nil];
+        
+        [paths addObject:tempFilePath];
+        [[PHAssetResourceManager defaultManager] writeDataForAssetResource:resource toFile:[NSURL fileURLWithPath:tempFilePath]  options:nil completionHandler:^(NSError * _Nullable error) {
+            if (error) {
+                
+            } else {
+                
+            }
+        }];
     }
-    if ([tzImagePickerVc.pickerDelegate respondsToSelector:@selector(imagePickerController:didFinishPickingPhotos:sourceAssets:isSelectOriginalPhoto:infos:)]) {
-        [tzImagePickerVc.pickerDelegate imagePickerController:tzImagePickerVc didFinishPickingPhotos:photos sourceAssets:assets isSelectOriginalPhoto:_isSelectOriginalPhoto infos:infoArr];
-    }
-    if (tzImagePickerVc.didFinishPickingPhotosHandle) {
-        tzImagePickerVc.didFinishPickingPhotosHandle(photos,assets,_isSelectOriginalPhoto);
-    }
-    if (tzImagePickerVc.didFinishPickingPhotosWithInfosHandle) {
-        tzImagePickerVc.didFinishPickingPhotosWithInfosHandle(photos,assets,_isSelectOriginalPhoto,infoArr);
-    }
+    self.result(paths);
 }
 
 #pragma mark - UICollectionViewDataSource && Delegate
@@ -612,77 +618,32 @@ static CGFloat itemMargin = 5;
     }
     TZAssetModel *model = _models[index];
     NSArray *resources = [PHAssetResource assetResourcesForAsset:model.asset];
-    PHAssetResource *resource = [resources firstObject];
-    NSString *fileName = resource.originalFilename;
-    if (model.asset.mediaType == PHAssetMediaTypeImage) {
-        PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
-        options.version = PHImageRequestOptionsVersionCurrent;
-        options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
-        options.synchronous = YES;
-        
-        NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:fileName];
-        [[NSFileManager defaultManager] removeItemAtPath:tempFilePath error:nil];
-        [[PHAssetResourceManager defaultManager] writeDataForAssetResource:resource
-                                                                    toFile:[NSURL fileURLWithPath:tempFilePath]
-                                                                   options:nil
-                                                         completionHandler:^(NSError * _Nullable error) {
-            if (error) {
-                self.result(@"");
-            } else {
-                [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:tempFilePath]];
-                self.result(tempFilePath);
-            }
-        }];
+    NSString *orgFilename = ((PHAssetResource*)resources[0]).originalFilename;
+    NSLog(orgFilename);
+    if (model.type == TZAssetModelMediaTypeVideo && !tzImagePickerVc.allowPickingMultipleVideo) {
+        if (tzImagePickerVc.selectedModels.count > 0) {
+            TZImagePickerController *imagePickerVc = (TZImagePickerController *)self.navigationController;
+            [imagePickerVc showAlertWithTitle:[NSBundle tz_localizedStringForKey:@"Can not choose both video and photo"]];
+        } else {
+            TZVideoPlayerController *videoPlayerVc = [[TZVideoPlayerController alloc] init];
+            videoPlayerVc.model = model;
+            [self.navigationController pushViewController:videoPlayerVc animated:YES];
+        }
+    } else if (model.type == TZAssetModelMediaTypePhotoGif && tzImagePickerVc.allowPickingGif && !tzImagePickerVc.allowPickingMultipleVideo) {
+        if (tzImagePickerVc.selectedModels.count > 0) {
+            TZImagePickerController *imagePickerVc = (TZImagePickerController *)self.navigationController;
+            [imagePickerVc showAlertWithTitle:[NSBundle tz_localizedStringForKey:@"Can not choose both photo and GIF"]];
+        } else {
+            TZGifPhotoPreviewController *gifPreviewVc = [[TZGifPhotoPreviewController alloc] init];
+            gifPreviewVc.model = model;
+            [self.navigationController pushViewController:gifPreviewVc animated:YES];
+        }
+    } else {
+        TZPhotoPreviewController *photoPreviewVc = [[TZPhotoPreviewController alloc] init];
+        photoPreviewVc.currentIndex = index;
+        photoPreviewVc.models = _models;
+        [self pushPhotoPrevireViewController:photoPreviewVc];
     }
-    else if(model.asset.mediaType == PHAssetMediaTypeVideo || model.asset.mediaSubtypes == PHAssetMediaSubtypePhotoLive){
-        PHVideoRequestOptions *options = [[PHVideoRequestOptions alloc] init];
-        options.version = PHImageRequestOptionsVersionCurrent;
-        options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
-        
-        NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:fileName];
-        [[NSFileManager defaultManager] removeItemAtPath:tempFilePath error:nil];
-        [[PHAssetResourceManager defaultManager] writeDataForAssetResource:resource
-                                                                    toFile:[NSURL fileURLWithPath:tempFilePath]
-                                                                   options:nil
-                                                         completionHandler:^(NSError * _Nullable error) {
-            if (error) {
-                self.result(@"");
-            } else {
-                [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:tempFilePath]];
-                self.result(tempFilePath);
-            }
-        }];
-    }
-//    NSString *orgFilename = ((PHAssetResource*)resources[0]).originalFilename;
-//    NSLog(orgFilename);
-//    self.result(orgFilename);
-    [self dismissViewControllerAnimated:(YES) completion:^{
-        
-    }];
-//    if (model.type == TZAssetModelMediaTypeVideo && !tzImagePickerVc.allowPickingMultipleVideo) {
-//        if (tzImagePickerVc.selectedModels.count > 0) {
-//            TZImagePickerController *imagePickerVc = (TZImagePickerController *)self.navigationController;
-//            [imagePickerVc showAlertWithTitle:[NSBundle tz_localizedStringForKey:@"Can not choose both video and photo"]];
-//        } else {
-//            TZVideoPlayerController *videoPlayerVc = [[TZVideoPlayerController alloc] init];
-//            videoPlayerVc.model = model;
-//            [self.navigationController pushViewController:videoPlayerVc animated:YES];
-//        }
-//    } else if (model.type == TZAssetModelMediaTypePhotoGif && tzImagePickerVc.allowPickingGif && !tzImagePickerVc.allowPickingMultipleVideo) {
-//        if (tzImagePickerVc.selectedModels.count > 0) {
-//            TZImagePickerController *imagePickerVc = (TZImagePickerController *)self.navigationController;
-//            [imagePickerVc showAlertWithTitle:[NSBundle tz_localizedStringForKey:@"Can not choose both photo and GIF"]];
-//        } else {
-//            TZGifPhotoPreviewController *gifPreviewVc = [[TZGifPhotoPreviewController alloc] init];
-//            gifPreviewVc.model = model;
-//            [self.navigationController pushViewController:gifPreviewVc animated:YES];
-//        }
-//    } else {
-//        TZPhotoPreviewController *photoPreviewVc = [[TZPhotoPreviewController alloc] init];
-//        photoPreviewVc.currentIndex = index;
-//        photoPreviewVc.models = _models;
-//        [self pushPhotoPrevireViewController:photoPreviewVc];
-//    }
 }
 
 #pragma mark - UIScrollViewDelegate

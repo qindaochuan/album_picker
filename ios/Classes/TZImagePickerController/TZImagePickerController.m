@@ -681,7 +681,6 @@
 #pragma mark - Public
 
 - (void)cancelButtonClick {
-    self.result(@"");
     if (self.autoDismiss) {
         [self dismissViewControllerAnimated:YES completion:^{
             [self callDelegateMethod];

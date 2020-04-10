@@ -48,7 +48,7 @@
 }
 
 - (void)pickFile{
-    TZImagePickerController *imagePickerVc = [[TZImagePickerController alloc] initWithMaxImagesCount:1 columnNumber:3 delegate:self pushPhotoPickerVc:YES result:self.result];
+    TZImagePickerController *imagePickerVc = [[TZImagePickerController alloc] initWithMaxImagesCount:5 columnNumber:4 delegate:self pushPhotoPickerVc:YES result:self.result];
        // imagePickerVc.barItemTextColor = [UIColor blackColor];
        // [imagePickerVc.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor blackColor]}];
        // imagePickerVc.navigationBar.tintColor = [UIColor blackColor];
@@ -91,9 +91,9 @@
        // 3. 设置是否可以选择视频/图片/原图
        imagePickerVc.allowPickingVideo = true;
        imagePickerVc.allowPickingImage = true;
-       imagePickerVc.allowPickingOriginalPhoto = true;
+       imagePickerVc.allowPickingOriginalPhoto = false;
        imagePickerVc.allowPickingGif = true;
-       imagePickerVc.allowPickingMultipleVideo = false; // 是否可以多选视频
+       imagePickerVc.allowPickingMultipleVideo = true; // 是否可以多选视频
        
        // 4. 照片排列按修改时间升序
        imagePickerVc.sortAscendingByModificationDate = true;
