@@ -482,6 +482,7 @@ static CGFloat itemMargin = 5;
             return;
         }
     }
+    
     NSMutableArray* paths = [[NSMutableArray alloc] init];
     __block int i = 0;
     for (PHAsset *phAsset in assets) {
@@ -489,19 +490,65 @@ static CGFloat itemMargin = 5;
         PHAssetResource *resource = [resources firstObject];
         NSString *fileName = resource.originalFilename;
         
-        NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:fileName];;
+        NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:fileName];
         [[NSFileManager defaultManager] removeItemAtPath:tempFilePath error:nil];
         
-        [paths addObject:tempFilePath];
         [[PHAssetResourceManager defaultManager] writeDataForAssetResource:resource toFile:[NSURL fileURLWithPath:tempFilePath]  options:nil completionHandler:^(NSError * _Nullable error) {
             if (error) {
                 
             } else {
-                
-            }
-            i++;
-            if(i >= assets.count){
-                self.result(paths);
+                //mov则转换为mp4
+                if(phAsset.mediaType == PHAssetMediaTypeVideo || phAsset.mediaSubtypes == PHAssetMediaSubtypePhotoLive){
+                    AVURLAsset *avAsset = [AVURLAsset URLAssetWithURL:[NSURL fileURLWithPath:tempFilePath] options:nil];
+                    NSArray *compatiblePresets = [AVAssetExportSession exportPresetsCompatibleWithAsset:avAsset];
+                    
+                    NSString* mp4FileName = [[fileName stringByDeletingPathExtension] stringByAppendingString:@".mp4"];
+                    NSString* mp4FilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:mp4FileName];
+                    [[NSFileManager defaultManager] removeItemAtPath:mp4FilePath error:nil];
+                    [paths addObject:mp4FilePath];
+                    
+                    if ([compatiblePresets containsObject:AVAssetExportPresetHighestQuality]) {
+                        AVAssetExportSession *exportSession = [[AVAssetExportSession alloc] initWithAsset:avAsset presetName:AVAssetExportPresetMediumQuality];
+                        exportSession.outputURL = [NSURL fileURLWithPath:mp4FilePath];
+                        exportSession.outputFileType = AVFileTypeMPEG4;
+                        exportSession.shouldOptimizeForNetworkUse = YES;
+                        
+                        [exportSession exportAsynchronouslyWithCompletionHandler:^(void)
+                        {
+                            switch (exportSession.status) {
+                                case AVAssetExportSessionStatusUnknown:
+                                    NSLog(@"AVAssetExportSessionStatusUnknown");
+                                    break;
+                                case AVAssetExportSessionStatusWaiting:
+                                    NSLog(@"AVAssetExportSessionStatusWaiting");
+                                    break;
+                                case AVAssetExportSessionStatusExporting:
+                                    NSLog(@"AVAssetExportSessionStatusExporting");
+                                    break;
+                                case AVAssetExportSessionStatusCompleted:
+                                    NSLog(@"AVAssetExportSessionStatusCompleted");
+                                    break;
+                                case AVAssetExportSessionStatusFailed:
+                                    NSLog(@"AVAssetExportSessionStatusFailed");
+                                    break;
+                                case AVAssetExportSessionStatusCancelled:
+                                    NSLog(@"AVAssetExportSessionStatusCancelled");
+                                    break;
+                            }
+                            i++;
+                            if(i >= assets.count){
+                                self.result(paths);
+                            }
+                        }];
+                    }
+                }
+                else{
+                    [paths addObject:tempFilePath];
+                    i++;
+                    if(i >= assets.count){
+                        self.result(paths);
+                    }
+                }
             }
         }];
     }
