@@ -39,7 +39,7 @@ class _MyAppState extends State<MyApp> {
             List<String> paths = await AlbumPicker.pickFile();
             String str = "";
             paths.forEach((f){
-              str += f + ";";
+              str += f + "\n";
             });
             setState(() {
               _filePath = str;

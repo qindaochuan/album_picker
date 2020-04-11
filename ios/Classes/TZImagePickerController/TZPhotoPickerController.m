@@ -483,6 +483,7 @@ static CGFloat itemMargin = 5;
         }
     }
     NSMutableArray* paths = [[NSMutableArray alloc] init];
+    __block int i = 0;
     for (PHAsset *phAsset in assets) {
         NSArray *resources = [PHAssetResource assetResourcesForAsset:phAsset];
         PHAssetResource *resource = [resources firstObject];
@@ -498,9 +499,12 @@ static CGFloat itemMargin = 5;
             } else {
                 
             }
+            i++;
+            if(i >= assets.count){
+                self.result(paths);
+            }
         }];
     }
-    self.result(paths);
 }
 
 #pragma mark - UICollectionViewDataSource && Delegate
