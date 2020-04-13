@@ -3,11 +3,23 @@ package com.luck.picture.lib.tools;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.luck.picture.lib.config.PictureSelectionConfig;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 import java.util.Objects;
 
 import okio.BufferedSource;
@@ -20,6 +32,25 @@ import okio.Okio;
  */
 public class AndroidQTransformUtils {
 
+    public static String getExtensionName(String filename) {
+        if ((filename != null) && (filename.length() > 0)) {
+            int dot = filename.lastIndexOf('.');
+            if ((dot >-1) && (dot < (filename.length() - 1))) {
+                return filename.substring(dot + 1);
+            }
+        }
+        return filename;
+    }
+
+    public static String getFileNameNoEx(String filename) {
+        if ((filename != null) && (filename.length() > 0)) {
+            int dot = filename.lastIndexOf('.');
+            if ((dot >-1) && (dot < (filename.length()))) {
+                return filename.substring(0, dot);
+            }
+        }
+        return filename;
+    }
 
     /**
      * 解析Android Q版本下图片
@@ -31,12 +62,30 @@ public class AndroidQTransformUtils {
      * @param customFileName
      * @return
      */
-    public static String copyPathToAndroidQ(Context ctx, String url, int width, int height, String mineType, String customFileName) {
+    public static String copyPathToAndroidQ(Context ctx, String url, int width, int height, String mineType, String customFileName, String fileName) {
         // 这里就是利用图片加载引擎的特性，因为图片加载器加载过了图片本地就有缓存，当然前提是用户设置了缓存策略
         if (PictureSelectionConfig.cacheResourcesEngine != null) {
+
             String cachePath = PictureSelectionConfig.cacheResourcesEngine.onCachePath(ctx, url);
             if (!TextUtils.isEmpty(cachePath)) {
-                return cachePath;
+                String ext = getExtensionName(fileName);
+                String path = getFileNameNoEx(cachePath);
+                String newPath = path + "." + ext;
+
+                FileChannel inputChannel = null;
+                FileChannel outputChannel = null;
+                try {
+                    inputChannel = new FileInputStream(new File(cachePath)).getChannel();
+                    outputChannel = new FileOutputStream(new File(newPath)).getChannel();
+                    outputChannel.transferFrom(inputChannel, 0, inputChannel.size());
+                    inputChannel.close();
+                    outputChannel.close();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return newPath;
             }
         }
 

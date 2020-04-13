@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -178,7 +179,11 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
                                     Log.i(TAG, "原图路径:" + media.getOriginalPath());
                                     Log.i(TAG, "Android Q 特有Path:" + media.getAndroidQToPath());
                                     Log.i(TAG, "Size: " + media.getSize());
-                                    paths.add(media.getPath());
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+                                        paths.add(media.getAndroidQToPath());
+                                    }else{
+                                        paths.add(media.getPath());
+                                    }
                                 }
                                 AlbumPickerDelegate.result.success(paths);
                             }

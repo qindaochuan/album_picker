@@ -290,7 +290,7 @@ public class Luban implements Handler.Callback {
                 if (isAndroidQ) {
                     String newFilePath = media.isCut() ? media.getCutPath() :
                             AndroidQTransformUtils.copyPathToAndroidQ(context, path.getPath(),
-                                    media.getWidth(), media.getHeight(), media.getMimeType(), filename);
+                                    media.getWidth(), media.getHeight(), media.getMimeType(), filename, media.getFileName());
                     result = new File(newFilePath);
                 } else {
                     result = new File(newPath);
@@ -303,7 +303,7 @@ public class Luban implements Handler.Callback {
                     if (isAndroidQ) {
                         String newFilePath = media.isCut() ? media.getCutPath() :
                                 AndroidQTransformUtils.copyPathToAndroidQ(context, path.getPath(),
-                                        media.getWidth(), media.getHeight(), media.getMimeType(), filename);
+                                        media.getWidth(), media.getHeight(), media.getMimeType(), filename, media.getFileName());
                         result = new File(newFilePath);
                     } else {
                         result = new File(newPath);
@@ -316,7 +316,7 @@ public class Luban implements Handler.Callback {
                 if (isAndroidQ) {
                     String newFilePath = media.isCut() ? media.getCutPath() :
                             AndroidQTransformUtils.copyPathToAndroidQ(context,
-                                    path.getPath(), media.getWidth(), media.getHeight(), media.getMimeType(), filename);
+                                    path.getPath(), media.getWidth(), media.getHeight(), media.getMimeType(), filename, media.getFileName());
                     result = new File(newFilePath);
                 } else {
                     result = new File(newPath);
@@ -327,7 +327,7 @@ public class Luban implements Handler.Callback {
                         isAndroidQ ? new File(media.isCut() ? media.getCutPath() :
                                 Objects.requireNonNull(AndroidQTransformUtils.copyPathToAndroidQ
                                         (context, path.getPath(),
-                                                media.getWidth(), media.getHeight(), media.getMimeType(), filename))) : new File(newPath);
+                                                media.getWidth(), media.getHeight(), media.getMimeType(), filename, media.getFileName()))) : new File(newPath);
             }
         }
         return result;
