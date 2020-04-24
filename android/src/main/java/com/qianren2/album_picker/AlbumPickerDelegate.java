@@ -1,14 +1,18 @@
 package com.qianren2.album_picker;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import androidx.core.content.ContextCompat;
 
@@ -21,6 +25,7 @@ import com.luck.picture.lib.listener.OnResultCallbackListener;
 import com.luck.picture.lib.style.PictureCropParameterStyle;
 import com.luck.picture.lib.style.PictureParameterStyle;
 import com.luck.picture.lib.style.PictureWindowAnimationStyle;
+import com.vincent.videocompressor.VideoCompress;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -40,6 +45,7 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
 
     private PictureParameterStyle mPictureParameterStyle;
     private PictureCropParameterStyle mCropParameterStyle;
+    private ProgressDialog progressDialog = null;
 
     public AlbumPickerDelegate(Activity activity){
         this.activity = activity;
@@ -168,7 +174,9 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
                         .forResult(new OnResultCallbackListener<LocalMedia>() {
                             @Override
                             public void onResult(List<LocalMedia> result) {
-                                List<String> paths = new ArrayList<String>();
+                                String path = null;
+                                List<String> imagePaths = new ArrayList<String>();
+                                List<String> videoPaths = new ArrayList<String>();
                                 for (LocalMedia media : result) {
                                     Log.i(TAG, "是否压缩:" + media.isCompressed());
                                     Log.i(TAG, "压缩:" + media.getCompressPath());
@@ -180,12 +188,23 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
                                     Log.i(TAG, "Android Q 特有Path:" + media.getAndroidQToPath());
                                     Log.i(TAG, "Size: " + media.getSize());
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
-                                        paths.add(media.getAndroidQToPath());
+                                        path = media.getAndroidQToPath();
                                     }else{
-                                        paths.add(media.getPath());
+                                        path = media.getPath();
+                                    }
+                                    int dot = path.lastIndexOf('.');
+                                    String ext = path.substring(dot + 1);
+                                    if(ext.equals("mp4") || ext.equals("MP$")){
+                                        videoPaths.add(path);
+                                    }else{
+                                        imagePaths.add(path);
                                     }
                                 }
-                                AlbumPickerDelegate.result.success(paths);
+                                if(videoPaths.size() >= 1){
+                                    multipleVideoCompress(imagePaths,videoPaths);
+                                }else{
+                                    AlbumPickerDelegate.result.success(imagePaths);
+                                }
                             }
 
                             @Override
@@ -196,6 +215,80 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
                 Looper.loop();
             }
         }.start();
+    }
+
+    void multipleVideoCompress(List<String> imagePaths, List<String> videoPaths){
+        if(progressDialog == null){
+            progressDialog = new ProgressDialog(activity);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setTitle("");
+            progressDialog.setMessage("视频压缩中...");
+            progressDialog.setIndeterminate(false);
+            progressDialog.setCancelable(false);
+        }else{
+            progressDialog.setMessage("视频压缩中...");
+            progressDialog.show();
+        }
+        progressDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    //progressDialog.dismiss();
+                }
+                return false;
+            }
+        });
+        progressDialog.show();
+
+        List<String> destPaths = new ArrayList<String>();
+        SerialExecutor serialExecutor = new SerialExecutor();
+        for (int i = 0; i < videoPaths.size(); i ++) {
+            final int j = i;
+            serialExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    String srcPath = videoPaths.get(j);
+                    int dot = srcPath.lastIndexOf('.');
+                    final String destPath = srcPath.substring(0, dot) + "_compress" + srcPath.substring(dot);
+                    destPaths.add(destPath);
+                    VideoCompress.compressVideoLow(srcPath, destPath, new VideoCompress.CompressListener() {
+
+                        @Override
+                        public void onStart() {
+
+                        }
+
+                        @Override
+                        public void onSuccess() {
+                            if (j == videoPaths.size() - 1) {
+                                Handler thisHandler = new Handler(Looper.getMainLooper());
+                                thisHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (progressDialog != null) {
+                                            progressDialog.dismiss();
+                                        }
+                                        List<String> tempList = new ArrayList<String>();
+                                        tempList.addAll(imagePaths);
+                                        tempList.addAll(destPaths);
+                                        result.success(tempList);
+                                    }
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onFail() {
+
+                        }
+
+                        @Override
+                        public void onProgress(float percent) {
+
+                        }
+                    });
+                }
+            });
+        }
     }
 
     @Override
