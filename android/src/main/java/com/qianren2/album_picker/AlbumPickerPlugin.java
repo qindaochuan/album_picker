@@ -146,7 +146,7 @@ public class AlbumPickerPlugin implements FlutterPlugin, MethodCallHandler, Acti
       delegate.pickFile(call,rawResult);
     }
     else if (call.method.equals("videoCompress")) {
-      //delegate.videoCompress(call, rawResult);
+      delegate.videoCompress(call, rawResult);
     }else {
       rawResult.notImplemented();
     }

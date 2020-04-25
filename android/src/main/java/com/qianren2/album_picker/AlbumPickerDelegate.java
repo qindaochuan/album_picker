@@ -42,10 +42,13 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
     public static MethodChannel.Result result = null;
 
     private static final int HANDLER_ALBUM_PICK = 1;
+    private static final int HANDLER_VIDEO_COMPRESS = 2;
 
     private PictureParameterStyle mPictureParameterStyle;
     private PictureCropParameterStyle mCropParameterStyle;
     private ProgressDialog progressDialog = null;
+    private ProgressDialog progressDialog2 = null;
+    private String srcPath = null;
 
     public AlbumPickerDelegate(Activity activity){
         this.activity = activity;
@@ -57,6 +60,16 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
         this.result = result;
         Message msg = new Message();
         msg.what = HANDLER_ALBUM_PICK;
+        handler.sendMessage(msg);
+    }
+
+    public void videoCompress(MethodCall call, MethodChannel.Result result){
+        System.out.println("Android call videoCompress(...)");
+        srcPath = call.argument("srcPath");
+        System.out.println("srcPath = " + srcPath);
+        this.result = result;
+        Message msg = new Message();
+        msg.what = HANDLER_VIDEO_COMPRESS;
         handler.sendMessage(msg);
     }
 
@@ -80,6 +93,9 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
             switch (msg.what){
                 case HANDLER_ALBUM_PICK:
                     theInstance.doAlbumPick();
+                    break;
+                case HANDLER_VIDEO_COMPRESS:
+                    theInstance.doVideoCompress();
                     break;
             }
         }
@@ -225,6 +241,7 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
             progressDialog.setMessage("视频压缩中...");
             progressDialog.setIndeterminate(false);
             progressDialog.setCancelable(false);
+            progressDialog.show();
         }else{
             progressDialog.setMessage("视频压缩中...");
             progressDialog.show();
@@ -237,7 +254,6 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
                 return false;
             }
         });
-        progressDialog.show();
 
         List<String> destPaths = new ArrayList<String>();
         SerialExecutor serialExecutor = new SerialExecutor();
@@ -289,6 +305,74 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
                 }
             });
         }
+    }
+
+    public void doVideoCompress(){
+        System.out.println("doVideoCompress()");
+        int dot = srcPath.lastIndexOf('.');
+        final String destPath = srcPath.substring(0,dot) + "_compress" + srcPath.substring(dot);
+        new Thread()
+        {
+            @Override
+            public void run() {
+                super.run();
+                Looper.prepare();
+                //if(progressDialog2 == null){
+                    progressDialog2 = new ProgressDialog(activity);
+                    progressDialog2.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                    progressDialog2.setTitle("");
+                    progressDialog2.setMessage("视频压缩中...");
+                    progressDialog2.setIndeterminate(false);
+                    progressDialog2.setCancelable(false);
+                    progressDialog2.show();
+//                }else{
+//                    progressDialog2.setMessage("视频压缩中...");
+//                    progressDialog2.show();
+//                }
+                progressDialog2.setOnKeyListener(new DialogInterface.OnKeyListener() {
+                    public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                        if (keyCode == KeyEvent.KEYCODE_BACK) {
+                            //progressDialog2.dismiss();
+                        }
+                        return false;
+                    }
+                });
+                VideoCompress.compressVideoLow(srcPath, destPath, new VideoCompress.CompressListener() {
+
+                    @Override
+                    public void onStart() {
+
+                    }
+
+                    @Override
+                    public void onSuccess() {
+                        Handler thisHandler = new Handler(Looper.getMainLooper());
+                        thisHandler.post(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                if (progressDialog2 != null) {
+                                    progressDialog2.cancel();
+                                }
+                                result.success(destPath);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFail() {
+
+                    }
+
+                    @Override
+                    public void onProgress(float percent) {
+
+                    }
+                });
+                Looper.loop();
+            }
+        }.start();
     }
 
     @Override
