@@ -194,7 +194,7 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
                                     }
                                     int dot = path.lastIndexOf('.');
                                     String ext = path.substring(dot + 1);
-                                    if(ext.equals("mp4") || ext.equals("MP$")){
+                                    if(ext.equals("mp4") || ext.equals("MP4")){
                                         videoPaths.add(path);
                                     }else{
                                         imagePaths.add(path);

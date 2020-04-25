@@ -14,4 +14,12 @@ class AlbumPicker {
     });
     return paths;
   }
+
+  static Future<String> videoCompress(String srcPath) async {
+    String path =
+    await _channel.invokeMethod<String>("videoCompress", <String, dynamic>{
+      'srcPath': srcPath,
+    });
+    return path;
+  }
 }
