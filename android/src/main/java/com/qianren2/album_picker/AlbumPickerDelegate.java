@@ -234,26 +234,29 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
     }
 
     void multipleVideoCompress(List<String> imagePaths, List<String> videoPaths){
-        if(progressDialog == null){
-            progressDialog = new ProgressDialog(activity);
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDialog.setTitle("");
-            progressDialog.setMessage("视频压缩中...");
-            progressDialog.setIndeterminate(false);
-            progressDialog.setCancelable(false);
-            progressDialog.show();
-        }else{
-            progressDialog.setMessage("视频压缩中...");
-            progressDialog.show();
-        }
-        progressDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    //progressDialog.dismiss();
-                }
-                return false;
+        new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                Looper.prepare();
+                progressDialog = new ProgressDialog(activity);
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progressDialog.setTitle("");
+                progressDialog.setMessage("视频压缩中...");
+                progressDialog.setIndeterminate(false);
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+                progressDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+                    public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                        if (keyCode == KeyEvent.KEYCODE_BACK) {
+                            //progressDialog.dismiss();
+                        }
+                        return false;
+                    }
+                });
+                Looper.loop();
             }
-        });
+        }.start();
 
         List<String> destPaths = new ArrayList<String>();
         SerialExecutor serialExecutor = new SerialExecutor();
@@ -317,18 +320,13 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
             public void run() {
                 super.run();
                 Looper.prepare();
-                //if(progressDialog2 == null){
-                    progressDialog2 = new ProgressDialog(activity);
-                    progressDialog2.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    progressDialog2.setTitle("");
-                    progressDialog2.setMessage("视频压缩中...");
-                    progressDialog2.setIndeterminate(false);
-                    progressDialog2.setCancelable(false);
-                    progressDialog2.show();
-//                }else{
-//                    progressDialog2.setMessage("视频压缩中...");
-//                    progressDialog2.show();
-//                }
+                progressDialog2 = new ProgressDialog(activity);
+                progressDialog2.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progressDialog2.setTitle("");
+                progressDialog2.setMessage("视频压缩中...");
+                progressDialog2.setIndeterminate(false);
+                progressDialog2.setCancelable(false);
+                progressDialog2.show();
                 progressDialog2.setOnKeyListener(new DialogInterface.OnKeyListener() {
                     public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
                         if (keyCode == KeyEvent.KEYCODE_BACK) {
