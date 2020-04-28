@@ -55,6 +55,7 @@ public final class PictureSelectionConfig implements Parcelable {
     public int minSelectNum;
     public int maxVideoSelectNum;
     public int minVideoSelectNum;
+    public int maxMultipleSelectNum = 5;
     public int videoQuality = 1;
     public int cropCompressQuality = 90;
     public int videoMaxSecond;
@@ -160,6 +161,7 @@ public final class PictureSelectionConfig implements Parcelable {
         minSelectNum = 0;
         maxVideoSelectNum = 0;
         minVideoSelectNum = 0;
+        maxMultipleSelectNum = 5;
         videoQuality = 1;
         language = -1;
         cropCompressQuality = 90;

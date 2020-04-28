@@ -203,14 +203,14 @@ public class PicturePreviewActivity extends PictureBaseActivity implements
                 // 未选择任何图片
                 mTvPictureOk.setText(isNotEmptyStyle && !TextUtils.isEmpty(config.style.pictureUnCompleteText)
                         ? config.style.pictureUnCompleteText : getString(R.string.picture_done_front_num,
-                        startCount, config.maxVideoSelectNum + config.maxSelectNum));
+                        startCount, config.maxMultipleSelectNum));
             } else {
                 // 已选择
                 if (isCompleteReplaceNum && !TextUtils.isEmpty(config.style.pictureCompleteText)) {
-                    mTvPictureOk.setText(String.format(config.style.pictureCompleteText, startCount, config.maxVideoSelectNum + config.maxSelectNum));
+                    mTvPictureOk.setText(String.format(config.style.pictureCompleteText, startCount, config.maxMultipleSelectNum));
                 } else {
                     mTvPictureOk.setText(getString(R.string.picture_done_front_num,
-                            startCount, config.maxVideoSelectNum + config.maxSelectNum));
+                            startCount, config.maxMultipleSelectNum));
                 }
             }
         }
@@ -463,6 +463,7 @@ public class PicturePreviewActivity extends PictureBaseActivity implements
         }
     }
 
+    //选择复选框
     protected void onCheckedComplete() {
         if (images != null && images.size() > 0) {
             LocalMedia image = images.get(viewPager.getCurrentItem());
@@ -488,11 +489,11 @@ public class PicturePreviewActivity extends PictureBaseActivity implements
                         return;
                     }
 
-                    if (videoSize >= config.maxVideoSelectNum && !check.isSelected()) {
-                        // 如果选择的是视频
-                        ToastUtils.s(getContext(), StringUtils.getMsg(getContext(), image.getMimeType(), config.maxVideoSelectNum));
-                        return;
-                    }
+//                    if (videoSize >= config.maxVideoSelectNum && !check.isSelected()) {
+//                        // 如果选择的是视频
+//                        ToastUtils.s(getContext(), StringUtils.getMsg(getContext(), image.getMimeType(), config.maxVideoSelectNum));
+//                        return;
+//                    }
 
                     if (!check.isSelected() && config.videoMinSecond > 0 && image.getDuration() < config.videoMinSecond) {
                         // 视频小于最低指定的长度
@@ -508,9 +509,15 @@ public class PicturePreviewActivity extends PictureBaseActivity implements
                     }
                 }
                 if (PictureMimeType.eqImage(image.getMimeType()) && imageSize >= config.maxSelectNum && !check.isSelected()) {
-                    ToastUtils.s(getContext(), StringUtils.getMsg(getContext(), image.getMimeType(), config.maxSelectNum));
+//                    ToastUtils.s(getContext(), StringUtils.getMsg(getContext(), image.getMimeType(), config.maxSelectNum));
+//                    return;
+                }
+
+                if(videoSize + imageSize >= config.maxMultipleSelectNum && !check.isSelected()) {
+                    ToastUtils.s(getContext(), "最多只能选择" + config.maxMultipleSelectNum + "个图片或视频");
                     return;
                 }
+
             } else {
                 // 非混选模式
                 if (!TextUtils.isEmpty(mimeType)) {

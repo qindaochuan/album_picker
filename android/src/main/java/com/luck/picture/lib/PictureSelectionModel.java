@@ -355,6 +355,10 @@ public class PictureSelectionModel {
         return this;
     }
 
+    public PictureSelectionModel maxMultipleSelectNum(int p_maxMultipleSelectNum){
+        selectionConfig.maxMultipleSelectNum = p_maxMultipleSelectNum;
+        return this;
+    }
 
     /**
      * @param Select whether to return directly

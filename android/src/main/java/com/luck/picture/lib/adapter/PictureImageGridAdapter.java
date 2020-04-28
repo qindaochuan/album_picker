@@ -345,11 +345,11 @@ public class PictureImageGridAdapter extends RecyclerView.Adapter<RecyclerView.V
                     return;
                 }
 
-                if (videoSize >= config.maxVideoSelectNum && !isChecked) {
-                    // 如果选择的是视频
-                    ToastUtils.s(context, StringUtils.getMsg(context, image.getMimeType(), config.maxVideoSelectNum));
-                    return;
-                }
+//                if (videoSize >= config.maxVideoSelectNum && !isChecked) {
+//                    // 如果选择的是视频
+//                    ToastUtils.s(context, StringUtils.getMsg(context, image.getMimeType(), config.maxVideoSelectNum));
+//                    return;
+//                }
 
                 if (!isChecked && config.videoMinSecond > 0 && image.getDuration() < config.videoMinSecond) {
                     // 视频小于最低指定的长度
@@ -367,10 +367,15 @@ public class PictureImageGridAdapter extends RecyclerView.Adapter<RecyclerView.V
             }
 
             if (PictureMimeType.eqImage(image.getMimeType())) {
-                if (imageSize >= config.maxSelectNum && !isChecked) {
-                    ToastUtils.s(context, StringUtils.getMsg(context, image.getMimeType(), config.maxSelectNum));
-                    return;
-                }
+//                if (imageSize >= config.maxSelectNum && !isChecked) {
+//                    ToastUtils.s(context, StringUtils.getMsg(context, image.getMimeType(), config.maxSelectNum));
+//                    return;
+//                }
+            }
+
+            if(videoSize + imageSize >= config.maxMultipleSelectNum && !isChecked) {
+                ToastUtils.s(context, "最多只能选择" + config.maxMultipleSelectNum + "个图片或视频");
+                return;
             }
 
         } else {

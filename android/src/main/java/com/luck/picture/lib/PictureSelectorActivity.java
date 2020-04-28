@@ -71,6 +71,15 @@ import java.util.Objects;
  * @data：2018/1/27 19:12
  * @描述: Media 选择页面
  */
+//View.OnClickListener onClick(View v)界面上的按钮 预览 完成 叉
+
+//OnAlbumItemClickListener onItemClick(boolean isCameraFolder, String folderName, List<LocalMedia> images) 相机按钮 相机胶卷 路径
+
+//OnPhotoSelectChangedListener
+//onChange(List<LocalMedia> selectImages)图片项的复选框
+//onPictureClick(LocalMedia media, int position) 点击图片
+
+//OnItemClickListener onItemClick(View view, int position) 拍照,录视频
 public class PictureSelectorActivity extends PictureBaseActivity implements View.OnClickListener,
         OnAlbumItemClickListener, OnPhotoSelectChangedListener<LocalMedia>, OnItemClickListener {
     protected ImageView mIvPictureLeftBack;
@@ -384,14 +393,14 @@ public class PictureSelectorActivity extends PictureBaseActivity implements View
                 // 未选择任何图片
                 mTvPictureOk.setText(isNotEmptyStyle && !TextUtils.isEmpty(config.style.pictureUnCompleteText)
                         ? config.style.pictureUnCompleteText : getString(R.string.picture_done_front_num,
-                        startCount, config.maxVideoSelectNum + config.maxSelectNum));
+                        startCount, config.maxMultipleSelectNum));
             } else {
                 // 已选择
                 if (isCompleteReplaceNum && !TextUtils.isEmpty(config.style.pictureCompleteText)) {
-                    mTvPictureOk.setText(String.format(config.style.pictureCompleteText, startCount, config.maxVideoSelectNum + config.maxSelectNum));
+                    mTvPictureOk.setText(String.format(config.style.pictureCompleteText, startCount, config.maxMultipleSelectNum));
                 } else {
                     mTvPictureOk.setText(getString(R.string.picture_done_front_num,
-                            startCount, config.maxVideoSelectNum + config.maxSelectNum));
+                            startCount, config.maxMultipleSelectNum));
                 }
             }
         }

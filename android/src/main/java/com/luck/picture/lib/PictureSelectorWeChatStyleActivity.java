@@ -261,10 +261,10 @@ public class PictureSelectorWeChatStyleActivity extends PictureSelectorActivity 
             } else {
                 boolean isCompleteReplaceNum = isNotEmptyStyle && config.style.isCompleteReplaceNum;
                 if (isCompleteReplaceNum && !TextUtils.isEmpty(config.style.pictureCompleteText)) {
-                    mPictureSendView.setText(String.format(config.style.pictureCompleteText, size, config.maxVideoSelectNum + config.maxSelectNum));
+                    mPictureSendView.setText(String.format(config.style.pictureCompleteText, size, config.maxMultipleSelectNum));
                 } else {
                     mPictureSendView.setText(isNotEmptyStyle && !TextUtils.isEmpty(config.style.pictureUnCompleteText)
-                            ? config.style.pictureUnCompleteText : getString(R.string.picture_send_num, size, config.maxVideoSelectNum + config.maxSelectNum));
+                            ? config.style.pictureUnCompleteText : getString(R.string.picture_send_num, size, config.maxMultipleSelectNum));
                 }
             }
         } else {
