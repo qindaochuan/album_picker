@@ -313,6 +313,9 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
 
     public void doVideoCompress(){
         System.out.println("doVideoCompress()");
+        if(!(srcPath != null && !srcPath.equals(""))){
+            return;
+        }
         int dot = srcPath.lastIndexOf('.');
         final String destPath = srcPath.substring(0,dot) + "_compress" + srcPath.substring(dot);
         new Thread()

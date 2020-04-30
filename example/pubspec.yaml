@@ -19,7 +19,7 @@ dev_dependencies:
 
   album_picker:
     path: ../
-  image_picker: ^0.6.5
+  image_picker: ^0.6.5+3
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

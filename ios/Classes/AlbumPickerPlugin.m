@@ -42,7 +42,12 @@
       self.result = result;
       _arguments = call.arguments;
       [self pickFile];
-  } else {
+  } else if([@"videoCompress" isEqualToString:call.method]){
+      self.result = result;
+      _arguments = call.arguments;
+      [self videoCompress];
+  }
+  else {
     result(FlutterMethodNotImplemented);
   }
 }
@@ -175,6 +180,48 @@
        
        imagePickerVc.modalPresentationStyle = UIModalPresentationFullScreen;
        [_viewController presentViewController:imagePickerVc animated:YES completion:nil];
+}
+
+- (void)videoCompress{
+    NSString* srcPath = [_arguments objectForKey:@"srcPath"];
+    BOOL isSrcPathExist = [[NSFileManager defaultManager] fileExistsAtPath:srcPath];
+    NSLog(@"mov文件是否存在%d",isSrcPathExist);
+    NSURL* url =  [NSURL fileURLWithPath:srcPath];
+    NSString *fileName = [srcPath lastPathComponent];
+    NSString* mp4FileName = [[fileName stringByDeletingPathExtension] stringByAppendingString:@".mp4"];
+    NSString* mp4FilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:mp4FileName];
+    AVURLAsset* avAsset = [AVURLAsset URLAssetWithURL:url options:nil];
+    NSArray *compatiblePresets = [AVAssetExportSession exportPresetsCompatibleWithAsset:avAsset];
+    if([compatiblePresets containsObject:AVAssetExportPresetMediumQuality]){
+        AVAssetExportSession* exportSession = [[AVAssetExportSession alloc] initWithAsset:avAsset presetName:AVAssetExportPresetMediumQuality];
+        exportSession.outputURL = [NSURL fileURLWithPath:mp4FilePath];
+        exportSession.outputFileType = AVFileTypeMPEG4;
+        exportSession.shouldOptimizeForNetworkUse = YES;
+        [exportSession exportAsynchronouslyWithCompletionHandler:^(void)
+        {
+            switch (exportSession.status) {
+                case AVAssetExportSessionStatusUnknown:
+                    NSLog(@"AVAssetExportSessionStatusUnknown");
+                    break;
+                case AVAssetExportSessionStatusWaiting:
+                    NSLog(@"AVAssetExportSessionStatusWaiting");
+                    break;
+                case AVAssetExportSessionStatusExporting:
+                    NSLog(@"AVAssetExportSessionStatusExporting");
+                    break;
+                case AVAssetExportSessionStatusCompleted:
+                    NSLog(@"AVAssetExportSessionStatusCompleted");
+                    break;
+                case AVAssetExportSessionStatusFailed:
+                    NSLog(@"AVAssetExportSessionStatusFailed");
+                    break;
+                case AVAssetExportSessionStatusCancelled:
+                    NSLog(@"AVAssetExportSessionStatusCancelled");
+                    break;
+            }
+            self.result(mp4FilePath);
+        }];
+    }
 }
 
 @end

@@ -1,7 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:album_picker/album_picker.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -13,9 +14,10 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _filePath = null;
+  String _filePath;
   String _fileInputPath = "";
   String _fileOutputPath = "";
+  String _smallVideoPath;
 
   @override
   void initState() {
@@ -65,11 +67,22 @@ class _MyAppState extends State<MyApp> {
                     )
                   ],
                 ),
+                Row(
+                  children: <Widget>[
+                    Text(
+                      "小视频路径: ",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    Expanded(
+                      child: Text(_smallVideoPath == null ? "" : _smallVideoPath),
+                    )
+                  ],
+                ),
               ],
             ),
           ),
-          floatingActionButton: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          floatingActionButton: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               RaisedButton(
                   child: Icon(Icons.album),
@@ -84,7 +97,7 @@ class _MyAppState extends State<MyApp> {
                     });
                   }),
               RaisedButton(
-                child: Text("Select File"),
+                child: Text("选择视频"),
                 onPressed: () async {
                   var image = await ImagePicker.pickVideo(source: ImageSource.gallery);
                   setState(() {
@@ -95,16 +108,31 @@ class _MyAppState extends State<MyApp> {
                 },
               ),
               RaisedButton(
-                child: Text("Start Compress"),
+                child: Text("压缩视频"),
                 onPressed: () async {
                   String destPath = await AlbumPicker.videoCompress(_fileInputPath);
                   setState(() {
                     _fileOutputPath = destPath;
                   });
                 },
+              ),
+              RaisedButton(
+                child: Text("拍摄小视频"),
+                onPressed: () async {
+                  String destPath = await captureSmallVideo();
+                  setState(() {
+                    _smallVideoPath = destPath;
+                  });
+                },
               )
             ],
           )),
     );
+  }
+
+  Future<String> captureSmallVideo() async{
+    var image = await ImagePicker.pickVideo(source: ImageSource.camera,maxDuration: Duration(seconds: 10));
+    String destPath = await AlbumPicker.videoCompress(image.path);
+    return destPath;
   }
 }
