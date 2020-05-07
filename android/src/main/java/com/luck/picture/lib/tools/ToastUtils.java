@@ -11,7 +11,8 @@ import android.widget.Toast;
 
 public final class ToastUtils {
     public static void s(Context context, String s) {
-        Toast.makeText(context.getApplicationContext(), s, Toast.LENGTH_SHORT)
-                .show();
+        ToastHelper.showToast(context,s);
+//        Toast.makeText(context.getApplicationContext(), s, Toast.LENGTH_SHORT)
+//                .show();
     }
 }

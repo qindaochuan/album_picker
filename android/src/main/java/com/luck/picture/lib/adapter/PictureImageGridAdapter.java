@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.net.Uri;
+import android.os.Build;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -362,6 +363,19 @@ public class PictureImageGridAdapter extends RecyclerView.Adapter<RecyclerView.V
                     // 视频时长超过了指定的长度
                     ToastUtils.s(context,
                             contentHolder.itemView.getContext().getString(R.string.picture_choose_max_seconds, config.videoMaxSecond / 1000));
+                    return;
+                }
+
+                String path = null;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+                    path = image.getAndroidQToPath();
+                }else{
+                    path = image.getPath();
+                }
+                int dot = path .lastIndexOf('.');
+                String ext = path.substring(dot + 1);
+                if(!isChecked && !(ext.equals("mp4") || ext.equals("MP4"))){
+                    ToastUtils.s(context,  "不支持的视频格式" + ext);
                     return;
                 }
             }

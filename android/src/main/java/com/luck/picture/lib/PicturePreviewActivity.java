@@ -2,6 +2,7 @@ package com.luck.picture.lib;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -505,6 +506,19 @@ public class PicturePreviewActivity extends PictureBaseActivity implements
                         // 视频时长超过了指定的长度
                         ToastUtils.s(getContext(),
                                 getContext().getString(R.string.picture_choose_max_seconds, config.videoMaxSecond / 1000));
+                        return;
+                    }
+
+                    String path = null;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+                        path = image.getAndroidQToPath();
+                    }else{
+                        path = image.getPath();
+                    }
+                    int dot = path .lastIndexOf('.');
+                    String ext = path.substring(dot + 1);
+                    if(!check.isSelected() && !(ext.equals("mp4") || ext.equals("MP4"))){
+                        ToastUtils.s(getContext(),  "不支持的视频格式" + ext);
                         return;
                     }
                 }
