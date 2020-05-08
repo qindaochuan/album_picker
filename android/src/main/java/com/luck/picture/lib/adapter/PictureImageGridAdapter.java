@@ -366,14 +366,10 @@ public class PictureImageGridAdapter extends RecyclerView.Adapter<RecyclerView.V
                     return;
                 }
 
-                String path = null;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
-                    path = image.getAndroidQToPath();
-                }else{
-                    path = image.getPath();
-                }
-                int dot = path .lastIndexOf('.');
-                String ext = path.substring(dot + 1);
+                String fileName = image.getFileName();
+                System.out.println(fileName);
+                int dot = fileName .lastIndexOf('.');
+                String ext = fileName.substring(dot + 1);
                 if(!isChecked && !(ext.equals("mp4") || ext.equals("MP4"))){
                     ToastUtils.s(context,  "不支持的视频格式" + ext);
                     return;
