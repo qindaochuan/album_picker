@@ -17,8 +17,9 @@
 @property (nonatomic, strong) TZAlbumModel *model;
 
 - (instancetype) initWithResult:(FlutterResult)result;
++ (void)showActivity;
++ (void)hideActivity;
 @end
-
 
 @interface TZCollectionView : UICollectionView
 

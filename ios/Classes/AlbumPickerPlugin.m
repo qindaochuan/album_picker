@@ -1,6 +1,7 @@
 #import "AlbumPickerPlugin.h"
 #import "TZImagePickerController.h"
 #import "FLAnimatedImage.h"
+#import "TZImagePickerController/TZPhotoPickerController.h"
 
 @interface AlbumPickerPlugin()<TZImagePickerControllerDelegate>
 
@@ -192,6 +193,7 @@
     NSString* mp4FilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:mp4FileName];
     AVURLAsset* avAsset = [AVURLAsset URLAssetWithURL:url options:nil];
     NSArray *compatiblePresets = [AVAssetExportSession exportPresetsCompatibleWithAsset:avAsset];
+    [TZPhotoPickerController showActivity];
     if([compatiblePresets containsObject:AVAssetExportPresetMediumQuality]){
         AVAssetExportSession* exportSession = [[AVAssetExportSession alloc] initWithAsset:avAsset presetName:AVAssetExportPresetMediumQuality];
         exportSession.outputURL = [NSURL fileURLWithPath:mp4FilePath];
@@ -219,7 +221,10 @@
                     NSLog(@"AVAssetExportSessionStatusCancelled");
                     break;
             }
-            self.result(mp4FilePath);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [TZPhotoPickerController hideActivity];
+                self.result(mp4FilePath);
+            });
         }];
     }
 }
