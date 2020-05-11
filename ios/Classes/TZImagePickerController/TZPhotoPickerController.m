@@ -486,6 +486,7 @@ static CGFloat itemMargin = 5;
     NSMutableArray* paths = [[NSMutableArray alloc] init];
     dispatch_queue_t serialQueue = dispatch_queue_create("processAssetsQueue", DISPATCH_QUEUE_SERIAL);
     __block int j = 0;
+    NSLock *lock = [[NSLock alloc] init];
     
     [TZPhotoPickerController showActivity];
     
@@ -495,8 +496,10 @@ static CGFloat itemMargin = 5;
             //PHAsset *phAsset = assets[i];
             if(phAsset.mediaType == PHAssetMediaTypeVideo){
                 [TZPhotoPickerController saveVideo:phAsset callback:^(NSString *filePath) {
+                    [lock lock];
                     [paths addObject:filePath];
                     j++;
+                    [lock unlock];
                     if(j >= assets.count){
                         dispatch_async(dispatch_get_main_queue(), ^{
                             [TZPhotoPickerController hideActivity];
@@ -506,8 +509,10 @@ static CGFloat itemMargin = 5;
                 }];
             }else if(phAsset.mediaType == PHAssetMediaTypeImage){
                 [TZPhotoPickerController saveImage:phAsset callback:^(NSString *filePath) {
+                    [lock lock];
                     [paths addObject:filePath];
                     j++;
+                    [lock unlock];
                     if(j >= assets.count){
                         dispatch_async(dispatch_get_main_queue(), ^{
                             [TZPhotoPickerController hideActivity];
