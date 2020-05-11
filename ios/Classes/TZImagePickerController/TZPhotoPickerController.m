@@ -485,86 +485,187 @@ static CGFloat itemMargin = 5;
     
     NSMutableArray* paths = [[NSMutableArray alloc] init];
     dispatch_queue_t serialQueue = dispatch_queue_create("processAssetsQueue", DISPATCH_QUEUE_SERIAL);
+    __block int j = 0;
     
     [TZPhotoPickerController showActivity];
-    __block int j = 0;
+    
     for (int i = 0; i < assets.count; i++){
         dispatch_async(serialQueue, ^{
             PHAsset *phAsset = [assets objectAtIndex:i];
             //PHAsset *phAsset = assets[i];
-            NSArray *resources = [PHAssetResource assetResourcesForAsset:phAsset];
-            PHAssetResource *resource = [resources firstObject];
-            NSString *fileName = resource.originalFilename;
-            
-            NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:fileName];
-            [[NSFileManager defaultManager] removeItemAtPath:tempFilePath error:nil];
-            
-            [[PHAssetResourceManager defaultManager] writeDataForAssetResource:resource toFile:[NSURL fileURLWithPath:tempFilePath]  options:nil completionHandler:^(NSError * _Nullable error) {
-                if (error) {
-                    
-                } else {
-                    //mov则转换为mp4
-                    if(phAsset.mediaType == PHAssetMediaTypeVideo || phAsset.mediaSubtypes == PHAssetMediaSubtypePhotoLive){
-                        AVURLAsset *avAsset = [AVURLAsset URLAssetWithURL:[NSURL fileURLWithPath:tempFilePath] options:nil];
-                        NSArray *compatiblePresets = [AVAssetExportSession exportPresetsCompatibleWithAsset:avAsset];
-                        
-                        NSString* mp4FileName = [[fileName stringByDeletingPathExtension] stringByAppendingString:@".mp4"];
-                        NSString* mp4FilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:mp4FileName];
-                        [[NSFileManager defaultManager] removeItemAtPath:mp4FilePath error:nil];
-                        [paths addObject:mp4FilePath];
-                        
-                        if ([compatiblePresets containsObject:AVAssetExportPresetHighestQuality]) {
-                            AVAssetExportSession *exportSession = [[AVAssetExportSession alloc] initWithAsset:avAsset presetName:AVAssetExportPresetMediumQuality];
-                            exportSession.outputURL = [NSURL fileURLWithPath:mp4FilePath];
-                            exportSession.outputFileType = AVFileTypeMPEG4;
-                            exportSession.shouldOptimizeForNetworkUse = YES;
-                            
-                            [exportSession exportAsynchronouslyWithCompletionHandler:^(void)
-                            {
-                                switch (exportSession.status) {
-                                    case AVAssetExportSessionStatusUnknown:
-                                        NSLog(@"AVAssetExportSessionStatusUnknown");
-                                        break;
-                                    case AVAssetExportSessionStatusWaiting:
-                                        NSLog(@"AVAssetExportSessionStatusWaiting");
-                                        break;
-                                    case AVAssetExportSessionStatusExporting:
-                                        NSLog(@"AVAssetExportSessionStatusExporting");
-                                        break;
-                                    case AVAssetExportSessionStatusCompleted:
-                                        NSLog(@"AVAssetExportSessionStatusCompleted");
-                                        break;
-                                    case AVAssetExportSessionStatusFailed:
-                                        NSLog(@"AVAssetExportSessionStatusFailed");
-                                        break;
-                                    case AVAssetExportSessionStatusCancelled:
-                                        NSLog(@"AVAssetExportSessionStatusCancelled");
-                                        break;
-                                }
-                                j++;
-                                if(j >= assets.count){
-                                    dispatch_async(dispatch_get_main_queue(), ^{
-                                        [TZPhotoPickerController hideActivity];
-                                        self.result(paths);
-                                    });
-                                }
-                            }];
-                        }
+            if(phAsset.mediaType == PHAssetMediaTypeVideo){
+                [TZPhotoPickerController saveVideo:phAsset callback:^(NSString *filePath) {
+                    [paths addObject:filePath];
+                    j++;
+                    if(j >= assets.count){
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [TZPhotoPickerController hideActivity];
+                            self.result(paths);
+                        });
                     }
-                    else{
-                        [paths addObject:tempFilePath];
-                        j++;
-                        if(j >= assets.count){
-                            dispatch_async(dispatch_get_main_queue(), ^{
-                                [TZPhotoPickerController hideActivity];
-                                self.result(paths);
-                            });
-                        }
+                }];
+            }else if(phAsset.mediaType == PHAssetMediaTypeImage){
+                [TZPhotoPickerController saveImage:phAsset callback:^(NSString *filePath) {
+                    [paths addObject:filePath];
+                    j++;
+                    if(j >= assets.count){
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [TZPhotoPickerController hideActivity];
+                            self.result(paths);
+                        });
                     }
-                }
-            }];
+                }];
+            }
         });
     }
+}
+
++ (void) saveVideo:(PHAsset *)phAsset callback:(void (^)(NSString * filePath))callback{
+    NSArray *resources = [PHAssetResource assetResourcesForAsset:phAsset];
+    PHAssetResource *resource = [resources firstObject];
+    NSString *fileName = resource.originalFilename;
+    
+    NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:fileName];
+    [[NSFileManager defaultManager] removeItemAtPath:tempFilePath error:nil];
+    
+    [[PHAssetResourceManager defaultManager] writeDataForAssetResource:resource toFile:[NSURL fileURLWithPath:tempFilePath]  options:nil completionHandler:^(NSError * _Nullable error) {
+        if (error) {
+            
+        } else {
+            //mov则转换为mp4
+            AVURLAsset *avAsset = [AVURLAsset URLAssetWithURL:[NSURL fileURLWithPath:tempFilePath] options:nil];
+            NSArray *compatiblePresets = [AVAssetExportSession exportPresetsCompatibleWithAsset:avAsset];
+            
+            NSString* mp4FileName = [[fileName stringByDeletingPathExtension] stringByAppendingString:@".mp4"];
+            NSString* mp4FilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:mp4FileName];
+            [[NSFileManager defaultManager] removeItemAtPath:mp4FilePath error:nil];
+            
+            if ([compatiblePresets containsObject:AVAssetExportPresetHighestQuality]) {
+                AVAssetExportSession *exportSession = [[AVAssetExportSession alloc] initWithAsset:avAsset presetName:AVAssetExportPresetMediumQuality];
+                exportSession.outputURL = [NSURL fileURLWithPath:mp4FilePath];
+                exportSession.outputFileType = AVFileTypeMPEG4;
+                exportSession.shouldOptimizeForNetworkUse = YES;
+                
+                [exportSession exportAsynchronouslyWithCompletionHandler:^(void)
+                 {
+                    switch (exportSession.status) {
+                        case AVAssetExportSessionStatusUnknown:
+                            NSLog(@"AVAssetExportSessionStatusUnknown");
+                            break;
+                        case AVAssetExportSessionStatusWaiting:
+                            NSLog(@"AVAssetExportSessionStatusWaiting");
+                            break;
+                        case AVAssetExportSessionStatusExporting:
+                            NSLog(@"AVAssetExportSessionStatusExporting");
+                            break;
+                        case AVAssetExportSessionStatusCompleted:
+                            NSLog(@"AVAssetExportSessionStatusCompleted");
+                            break;
+                        case AVAssetExportSessionStatusFailed:
+                            NSLog(@"AVAssetExportSessionStatusFailed");
+                            break;
+                        case AVAssetExportSessionStatusCancelled:
+                            NSLog(@"AVAssetExportSessionStatusCancelled");
+                            break;
+                    }
+                    if(callback){
+                        callback(mp4FilePath);
+                    }
+                }];
+            }
+        }
+    }];
+}
+
++ (void) saveImage:(PHAsset *)phAsset callback:(void (^)(NSString * filePath))callback{
+    NSArray *resources = [PHAssetResource assetResourcesForAsset:phAsset];
+    PHAssetResource *resource = [resources firstObject];
+    NSString *fileName = resource.originalFilename;
+    
+    NSString* tempFileName = [[fileName stringByDeletingPathExtension] stringByAppendingString:@".jpg"];
+    NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:tempFileName];
+    [[NSFileManager defaultManager] removeItemAtPath:tempFilePath error:nil];
+    
+    [[PHImageManager defaultManager] requestImageDataForAsset:phAsset options:nil resultHandler:^(NSData * _Nullable imageData, NSString * _Nullable dataUTI, UIImageOrientation orientation, NSDictionary * _Nullable info) {
+        UIImage* contextedImage;
+        UIImage* image = [[UIImage alloc] initWithData:imageData];
+        
+        CGAffineTransform transform = CGAffineTransformIdentity;
+        if (image.imageOrientation == UIImageOrientationUp) {
+            contextedImage = image;
+        }else{
+            switch (image.imageOrientation) {
+                case UIImageOrientationDown:
+                case UIImageOrientationDownMirrored:
+                    transform = CGAffineTransformTranslate(transform, image.size.width, image.size.height);
+                    transform = CGAffineTransformRotate(transform, M_PI);
+                    break;
+                case UIImageOrientationLeft:
+                case UIImageOrientationLeftMirrored:
+                    transform = CGAffineTransformTranslate(transform, image.size.width, 0);
+                    transform = CGAffineTransformRotate(transform, M_PI_2);
+                    break;
+                case UIImageOrientationRight:
+                case UIImageOrientationRightMirrored:
+                    transform = CGAffineTransformTranslate(transform, 0,image.size.height);
+                    transform = CGAffineTransformRotate(transform, -M_PI_2);
+                    break;
+                default:
+                    break;
+            }
+            
+            switch (image.imageOrientation) {
+                case UIImageOrientationUpMirrored:
+                case UIImageOrientationDownMirrored:
+                    transform = CGAffineTransformTranslate(transform, image.size.width, 0);
+                    transform = CGAffineTransformScale(transform, -1, 1);
+                    break;
+                case UIImageOrientationLeftMirrored:
+                case UIImageOrientationRightMirrored:
+                    transform = CGAffineTransformTranslate(transform, image.size.height, 0);
+                    transform = CGAffineTransformScale(transform, -1, 1);
+                    break;
+                default:
+                    break;
+            }
+            
+            CGContextRef ctx = CGBitmapContextCreate(NULL, image.size.width, image.size.height, CGImageGetBitsPerComponent(image.CGImage), 0, CGImageGetColorSpace(image.CGImage), CGImageGetBitmapInfo(image.CGImage));
+            CGContextConcatCTM(ctx, transform);
+            switch (image.imageOrientation) {
+                case UIImageOrientationLeft:
+                case UIImageOrientationLeftMirrored:
+                case UIImageOrientationRight:
+                case UIImageOrientationRightMirrored:
+                    CGContextDrawImage(ctx, CGRectMake(0, 0, image.size.height,image.size.width), image.CGImage);
+                    break;
+                default:
+                    CGContextDrawImage(ctx, CGRectMake(0, 0, image.size.width, image.size.height), image.CGImage);
+                    break;
+            }
+
+            CGImageRef cgimg = CGBitmapContextCreateImage(ctx);
+            contextedImage = [UIImage imageWithCGImage:cgimg];
+            CGContextRelease(ctx);
+            CGImageRelease(cgimg);
+        }
+        
+        NSData * imagedata = UIImageJPEGRepresentation(contextedImage, 0.5);
+        NSFileManager * fm = [NSFileManager defaultManager];
+        //NSData *amr = EncodeWAVEToAMR(wav, 1, 16);
+        
+        BOOL tmpFlag = [fm createFileAtPath:tempFilePath contents:imagedata attributes:nil];
+        if ( tmpFlag == NO)
+        {
+            NSLog(@"No");
+        }
+        else
+        {
+            NSLog(@"Yes--------%@",tempFilePath);
+        }
+        if(callback){
+           callback(tempFilePath);
+       }
+    }];
 }
 
 //显示风火轮
