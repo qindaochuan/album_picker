@@ -487,6 +487,7 @@ static CGFloat itemMargin = 5;
     dispatch_queue_t serialQueue = dispatch_queue_create("processAssetsQueue", DISPATCH_QUEUE_SERIAL);
     
     [TZPhotoPickerController showActivity];
+    __block int j = 0;
     for (int i = 0; i < assets.count; i++){
         dispatch_async(serialQueue, ^{
             PHAsset *phAsset = [assets objectAtIndex:i];
@@ -540,7 +541,8 @@ static CGFloat itemMargin = 5;
                                         NSLog(@"AVAssetExportSessionStatusCancelled");
                                         break;
                                 }
-                                if(i == assets.count - 1){
+                                j++;
+                                if(j >= assets.count){
                                     dispatch_async(dispatch_get_main_queue(), ^{
                                         [TZPhotoPickerController hideActivity];
                                         self.result(paths);
@@ -551,7 +553,8 @@ static CGFloat itemMargin = 5;
                     }
                     else{
                         [paths addObject:tempFilePath];
-                        if(i == assets.count -1){
+                        j++;
+                        if(j >= assets.count){
                             dispatch_async(dispatch_get_main_queue(), ^{
                                 [TZPhotoPickerController hideActivity];
                                 self.result(paths);
