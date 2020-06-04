@@ -27,6 +27,7 @@ import com.luck.picture.lib.style.PictureParameterStyle;
 import com.luck.picture.lib.style.PictureWindowAnimationStyle;
 import com.vincent.videocompressor.VideoCompress;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,10 +50,17 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
     private ProgressDialog progressDialog = null;
     private ProgressDialog progressDialog2 = null;
     private String srcPath = null;
+    private String videoCompressDir = null;
 
     public AlbumPickerDelegate(Activity activity){
         this.activity = activity;
         this.handler = new MyHandler(activity,this);
+        final String cacheDir = activity.getCacheDir().getAbsolutePath();
+        this.videoCompressDir = cacheDir + "/" + "VideoCompress";
+        File file = new File(this.videoCompressDir);
+        if(!file.exists()){
+            file.mkdir();
+        }
     }
 
     public void pickFile(MethodCall call, MethodChannel.Result result){
@@ -267,10 +275,11 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
                 @Override
                 public void run() {
                     String srcPath = videoPaths.get(j);
-                    int dot = srcPath.lastIndexOf('.');
-                    final String destPath = srcPath.substring(0, dot) + "_compress" + srcPath.substring(dot);
+                    //int dot = srcPath.lastIndexOf('.');
+                    //final String destPath = srcPath.substring(0, dot) + "_compress" + srcPath.substring(dot);
+                    final String destPath = videoCompressDir + "/" + new File(srcPath).getName();
                     destPaths.add(destPath);
-                    VideoCompress.compressVideoLow(srcPath, destPath, new VideoCompress.CompressListener() {
+                    VideoCompress.compressVideoMedium(srcPath, destPath, new VideoCompress.CompressListener() {
 
                         @Override
                         public void onStart() {
@@ -316,8 +325,9 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
         if(!(srcPath != null && !srcPath.equals(""))){
             return;
         }
-        int dot = srcPath.lastIndexOf('.');
-        final String destPath = srcPath.substring(0,dot) + "_compress" + srcPath.substring(dot);
+        //int dot = srcPath.lastIndexOf('.');
+        //final String destPath = srcPath.substring(0, dot) + "_compress" + srcPath.substring(dot);
+        final String destPath = videoCompressDir + "/" + new File(srcPath).getName();
         new Thread()
         {
             @Override
@@ -339,7 +349,7 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
                         return false;
                     }
                 });
-                VideoCompress.compressVideoLow(srcPath, destPath, new VideoCompress.CompressListener() {
+                VideoCompress.compressVideoMedium(srcPath, destPath, new VideoCompress.CompressListener() {
 
                     @Override
                     public void onStart() {
