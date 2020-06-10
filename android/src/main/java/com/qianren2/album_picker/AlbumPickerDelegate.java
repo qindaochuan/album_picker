@@ -202,6 +202,7 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
                                 String path = null;
                                 List<String> imagePaths = new ArrayList<String>();
                                 List<String> videoPaths = new ArrayList<String>();
+                                List<String> paths = new ArrayList<>();
                                 for (LocalMedia media : result) {
                                     Log.i(TAG, "是否压缩:" + media.isCompressed());
                                     Log.i(TAG, "压缩:" + media.getCompressPath());
@@ -217,6 +218,7 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
                                     }else{
                                         path = media.getPath();
                                     }
+                                    paths.add(path);
                                     int dot = path.lastIndexOf('.');
                                     String ext = path.substring(dot + 1);
                                     if(ext.equals("mp4") || ext.equals("MP4")){
@@ -225,11 +227,12 @@ public class AlbumPickerDelegate implements PluginRegistry.ActivityResultListene
                                         imagePaths.add(path);
                                     }
                                 }
-                                if(videoPaths.size() >= 1){
-                                    multipleVideoCompress(imagePaths,videoPaths);
-                                }else{
-                                    AlbumPickerDelegate.result.success(imagePaths);
-                                }
+//                                if(videoPaths.size() >= 1){
+//                                    multipleVideoCompress(imagePaths,videoPaths);
+//                                }else{
+//                                    AlbumPickerDelegate.result.success(imagePaths);
+//                                }
+                                AlbumPickerDelegate.result.success(paths);
                             }
 
                             @Override
