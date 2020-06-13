@@ -495,7 +495,7 @@ static CGFloat itemMargin = 5;
             PHAsset *phAsset = [assets objectAtIndex:i];
             //PHAsset *phAsset = assets[i];
             if(phAsset.mediaType == PHAssetMediaTypeVideo){
-                [TZPhotoPickerController saveVideo:phAsset callback:^(NSString *filePath) {
+                [TZPhotoPickerController saveVideoRawMOV:phAsset callback:^(NSString *filePath) {
                     [lock lock];
                     [paths addObject:filePath];
                     j++;
@@ -525,7 +525,7 @@ static CGFloat itemMargin = 5;
     }
 }
 
-+ (void) saveVideo:(PHAsset *)phAsset callback:(void (^)(NSString * filePath))callback{
++ (void) saveVideoAndExportToMP4:(PHAsset *)phAsset callback:(void (^)(NSString * filePath))callback{
     NSArray *resources = [PHAssetResource assetResourcesForAsset:phAsset];
     PHAssetResource *resource = [resources firstObject];
     NSString *fileName = resource.originalFilename;
@@ -577,6 +577,25 @@ static CGFloat itemMargin = 5;
                         callback(mp4FilePath);
                     }
                 }];
+            }
+        }
+    }];
+}
+
++ (void) saveVideoRawMOV:(PHAsset *)phAsset callback:(void (^)(NSString * filePath))callback{
+    NSArray *resources = [PHAssetResource assetResourcesForAsset:phAsset];
+    PHAssetResource *resource = [resources firstObject];
+    NSString *fileName = resource.originalFilename;
+    
+    NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:fileName];
+    [[NSFileManager defaultManager] removeItemAtPath:tempFilePath error:nil];
+    
+    [[PHAssetResourceManager defaultManager] writeDataForAssetResource:resource toFile:[NSURL fileURLWithPath:tempFilePath]  options:nil completionHandler:^(NSError * _Nullable error) {
+        if (error) {
+            
+        } else {
+            if(callback){
+                callback(tempFilePath);
             }
         }
     }];
